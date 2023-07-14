@@ -1,15 +1,15 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-
+import 'package:test_app/globals.dart';
 class EditShoppingListItem extends StatefulWidget {
   final String currentName;
   final String currentAmount;
-  Map<String, List> shoppingLists;
+  final String title;
   final int index;
 
 EditShoppingListItem(
-      this.currentName, this.currentAmount, this.shoppingLists, this.index,
+      this.currentName, this.currentAmount, this.title, this.index, 
       {super.key});
 
   @override
@@ -17,7 +17,16 @@ EditShoppingListItem(
 }
 
 class _EditShoppingListItemState extends State<EditShoppingListItem> {
+  Map shoppingLists = {};
+  Map shoppingList = {};
   var textFieldErrorText = null;
+
+  void initState()
+  {
+    super.initState();
+    shoppingLists = ShoppingListPreferences.getShoppingLists();
+    shoppingList = shoppingLists[widget.title];
+  }  
 
   @override
   Widget build(BuildContext context) {
@@ -79,27 +88,29 @@ class _EditShoppingListItemState extends State<EditShoppingListItem> {
   }
 
   void editItem(int index, String newName, String newAmount) {
-    Map<String, List<dynamic>> newShoppingLists = {};
-    List<String> oldlistKeys = widget.shoppingLists.keys.toList();
-    List<String> listKeys = widget.shoppingLists.keys.toList();
+    Map<String, List<dynamic>> newShoppingList = {};
+    List oldlistKeys = shoppingList.keys.toList();
+    List listKeys = shoppingList.keys.toList();
     listKeys[index] = newName;
     for (int i = 0; i < listKeys.length; i++)
     {
       if (listKeys[i] == newName)
       {
-        bool checkValue = widget.shoppingLists[oldlistKeys[i]]![1];
-        newShoppingLists[listKeys[i]] = [newAmount, checkValue];
+        bool checkValue = shoppingList[oldlistKeys[i]]![1];
+        newShoppingList[listKeys[i]] = [newAmount, checkValue];
       }
       else{
-      newShoppingLists[listKeys[i]] = widget.shoppingLists[listKeys[i]]!;
+      newShoppingList[listKeys[i]] = shoppingList[listKeys[i]]!;
       }
     }
 
-    widget.shoppingLists.clear();
+    shoppingList.clear();
     for (final String idx in listKeys)
     {
-      widget.shoppingLists[idx] = newShoppingLists[idx]!;
+      shoppingList[idx] = newShoppingList[idx]!;
     }
 
+    shoppingLists[widget.title] = shoppingList;
+    ShoppingListPreferences.setShoppingLists(shoppingLists);
   }
 }

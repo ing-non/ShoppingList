@@ -1,20 +1,30 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:test_app/globals.dart';
 
 class AddShoppingListItem extends StatefulWidget {
-  Map<String, List> listData = {};
-  AddShoppingListItem(this.listData, {super.key});
+  String title;
+  final Function notifyParent;
+  AddShoppingListItem(this.title, {super.key, required this.notifyParent});
 
   @override
   State<AddShoppingListItem> createState() => _AddShoppingListItemState();
 }
 
 class _AddShoppingListItemState extends State<AddShoppingListItem> {
+  Map shoppingLists = {};
+  Map shoppingList = {};
   final itemName = TextEditingController();
   final amount = TextEditingController();
-
   var textFieldErrorText = null;
+
+  void initState()
+  {
+    super.initState();
+    shoppingLists = ShoppingListPreferences.getShoppingLists();
+    shoppingList = shoppingLists[widget.title];
+  }
 
   @override
   void dispose() {
@@ -70,7 +80,7 @@ class _AddShoppingListItemState extends State<AddShoppingListItem> {
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(primary: Colors.purple),
               child: Text("Add Item to list"),
-              onPressed: () {
+              onPressed: () async{
                 addItem();
                 //Navigator.pop(context); Automatic return to list on button pressed, not always helpful
               },
@@ -80,7 +90,7 @@ class _AddShoppingListItemState extends State<AddShoppingListItem> {
   }
 
   int checkItemName() {
-    if (widget.listData.containsKey(itemName.text)) {
+    if (shoppingList.containsKey(itemName.text)) {
       setState(() {
         textFieldErrorText = "Please enter an item name that is not used!";
       });
@@ -92,13 +102,17 @@ class _AddShoppingListItemState extends State<AddShoppingListItem> {
     return 1;
   }
 
-  void addItem() {
+  void addItem() async {
     if (checkItemName() == 0) {
       return;
     } else {
-      widget.listData[itemName.text] = [amount.text, false];
+      shoppingList[itemName.text] = [amount.text, false];
       itemName.clear();
       amount.clear();
+
+      shoppingLists[widget.title] = shoppingList;
+      ShoppingListPreferences.setShoppingLists(shoppingLists);
+      widget.notifyParent();
     }
   }
 }

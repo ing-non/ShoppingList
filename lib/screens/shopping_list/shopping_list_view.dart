@@ -1,25 +1,46 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:test_app/globals.dart';
 import 'add_list_item.dart';
 import 'edit_list_item.dart';
 
 class ShoppingListView extends StatefulWidget {
-  Map<String, List> listData = {};
+
   String title;
-  ShoppingListView(this.listData, this.title, {super.key});
+  ShoppingListView(this.title, {super.key});
   @override
   ShoppingListViewState createState() => ShoppingListViewState();
 }
 
 class ShoppingListViewState extends State<ShoppingListView> {
   static double addItemSize = 56;
-
+  Map shoppingLists = {};
+  Map shoppingList = {};
+  List shoppingListItems = [];
 
   @override
+  void initState() {
+    super.initState();
+    shoppingLists = ShoppingListPreferences.getShoppingLists();
+    shoppingList = shoppingLists[widget.title];
+    shoppingListItems = shoppingList.values.toList();
+  }
+
+  void refresh(){
+    setState(() {
+      shoppingLists = ShoppingListPreferences.getShoppingLists();
+      shoppingList = shoppingLists[widget.title];
+      shoppingListItems = shoppingList.values.toList();
+    });
+    print(shoppingList);
+  }
+
   void delete_item(String key) {
-    widget.listData.remove(key);
-    setState(() {});
+    shoppingList.remove(key);
+    shoppingLists[widget.title] = shoppingList;
+    ShoppingListPreferences.setShoppingLists(shoppingLists);
+    refresh();
   }
 
   Widget build(BuildContext context) {
@@ -45,10 +66,14 @@ class ShoppingListViewState extends State<ShoppingListView> {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                AddShoppingListItem(widget.listData),
+                                AddShoppingListItem(widget.title, notifyParent: refresh),
                           ),
                         ).then((value) {
-                          setState(() {});
+                          setState(() {
+                            shoppingLists =
+                                ShoppingListPreferences.getShoppingListItem(
+                                    widget.title);
+                          });
                         });
                       },
                       child: Icon(
@@ -65,7 +90,7 @@ class ShoppingListViewState extends State<ShoppingListView> {
             color: Colors.purpleAccent,
             child: ReorderableListView.builder(
                 buildDefaultDragHandles: false,
-                itemCount: widget.listData.keys.toList().length,
+                itemCount: shoppingList.keys.toList().length,
                 itemBuilder: (BuildContext context, int index) {
                   return GestureDetector(
                       key: Key('$index'),
@@ -82,31 +107,33 @@ class ShoppingListViewState extends State<ShoppingListView> {
                                 EdgeInsets.only(left: 30, right: 20),
                             activeColor: Colors.purpleAccent,
                             title: Text(
-                              "${index + 1} ${widget.listData.keys.toList()[index]}",
+                              "${index + 1} ${shoppingList.keys.toList()[index]}",
                               style: TextStyle(
                                   fontWeight:
-                                      widget.listData.values.toList()[index][1]
+                                      shoppingListItems[index][1]
                                           ? FontWeight.normal
                                           : FontWeight.bold,
                                   decoration:
-                                      widget.listData.values.toList()[index][1]
+                                      shoppingListItems[index][1]
                                           ? TextDecoration.lineThrough
                                           : null,
                                   decorationThickness: 4),
                             ),
                             subtitle: Text(
-                                widget.listData.values.toList()[index][0],
+                               "${shoppingListItems[index][0]}",
                                 style: TextStyle(
-                                    decoration: widget.listData.values
-                                            .toList()[index][1]
+                                    decoration: shoppingListItems[index][1]
                                         ? TextDecoration.lineThrough
                                         : null,
                                     decorationThickness: 4)),
-                            value: widget.listData.values.toList()[index][1],
+                            value: shoppingListItems[index][1],
                             onChanged: (bool? newValue) {
                               setState(() {
-                                widget.listData.values.toList()[index][1] =
+                                shoppingListItems[index][1] =
                                     newValue;
+                                shoppingList.values.toList()[index][1] = newValue;
+                                shoppingLists[widget.title] = shoppingList;
+                                ShoppingListPreferences.setShoppingLists(shoppingLists);
                               });
                             },
                             secondary: Row(
@@ -122,19 +149,18 @@ class ShoppingListViewState extends State<ShoppingListView> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) =>
-                                              EditShoppingListItem(
-                                                  widget.listData.keys
-                                                      .toList()[index]
-                                                      .toString(),
-                                                  widget.listData.values
-                                                      .toList()[index][0],
-                                                  widget.listData,
-                                                  index),
-                                        ),
+                                            builder: (context) =>
+                                                EditShoppingListItem(
+                                                    shoppingList.keys
+                                                        .toList()[index]
+                                                        .toString(),
+                                                    shoppingList.values
+                                                        .toList()[index][0],
+                                                    widget.title,
+                                                    index)),
                                       ).then(
                                         (value) {
-                                          setState(() {});
+                                          refresh();
                                         },
                                       );
                                     })
@@ -149,7 +175,7 @@ class ShoppingListViewState extends State<ShoppingListView> {
                             builder: (context) {
                               return AlertDialog(
                                 title: Text(
-                                    "Do you want to delete \"${widget.listData.keys.toList()[0]}\""),
+                                    "Do you want to delete \"${shoppingList.keys.toList()[index]}\""),
                                 actions: [
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
@@ -167,11 +193,10 @@ class ShoppingListViewState extends State<ShoppingListView> {
                                           primary: Colors.red),
                                       onPressed: () {
                                         delete_item(
-                                            widget.listData.keys.toList()[0]);
+                                            shoppingList.keys.toList()[index]);
                                         Navigator.pop(context);
-                                        setState(() {});
                                       },
-                                      child: Text("Delete?")),
+                                      child: Text("Delete")),
                                 ],
                               );
                             });
@@ -182,16 +207,19 @@ class ShoppingListViewState extends State<ShoppingListView> {
                     if (oldIndex < newIndex) {
                       newIndex -= 1;
                     }
-                    Map<String, List<dynamic>> newListData = {};
-                    List itemKeys = widget.listData.keys.toList();
+                    Map<String, List<dynamic>> newShoppingList = {};
+                    List itemKeys = shoppingList.keys.toList();
                     final String item = itemKeys.removeAt(oldIndex);
                     itemKeys.insert(newIndex, item);
 
                     for (final index in itemKeys) {
-                      newListData[index] = widget.listData[index]!;
+                      newShoppingList[index] = shoppingList[index];
                     }
 
-                    widget.listData = newListData;
+                    shoppingList = newShoppingList;
+                    shoppingLists[widget.title] = shoppingList;
+                    ShoppingListPreferences.setShoppingLists(shoppingLists);
+                    refresh();
                   });
                 }),
           ),

@@ -208,7 +208,7 @@ class _HomeScreenCardState extends State<HomeScreenCard> {
                             ),
                             ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                    primary: Colors.red),
+                                    backgroundColor: Colors.red),
                                 onPressed: () async {
                                   widget.deleteList(widget.title);
                                   setState(() {
@@ -216,7 +216,7 @@ class _HomeScreenCardState extends State<HomeScreenCard> {
                                   });
                                   Navigator.pop(context);
                                 },
-                                child: Text("Delete?")),
+                                child: Text("Delete")),
                           ],
                         );
                       },
