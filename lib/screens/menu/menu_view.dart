@@ -112,35 +112,13 @@ class _MenuHomeState extends State<MenuHome> {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 245, 245, 245),
       appBar: AppBar(
-          backgroundColor: Color.fromARGB(255, 245, 245, 245),
-          title: Text(
-            menuName,
-            style: TextStyle(color: Color.fromARGB(230, 65, 65, 65)),
-          ),
-          elevation: 0,
-          actions: [
-            Padding(
-                padding: EdgeInsets.only(right: 10.0),
-                child: Ink(
-                    width: addListSize,
-                    height: addListSize,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(addListSize / 2),
-                      onTap: () {
-                        Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Container()))
-                            .then((value) {
-                          setState(() {});
-                        });
-                      },
-                      child: Icon(
-                        Icons.add,
-                        color: Color.fromARGB(230, 65, 65, 65),
-                      ),
-                    )))
-          ]),
+        backgroundColor: Color.fromARGB(255, 245, 245, 245),
+        title: Text(
+          menuName,
+          style: TextStyle(color: Color.fromARGB(230, 65, 65, 65)),
+        ),
+        elevation: 0,
+      ),
       body: PageView(controller: pageViewController, children: [
         for (final date in allTimeMenus.keys.toList())
           ListView(children: [
