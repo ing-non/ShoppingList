@@ -1,18 +1,26 @@
 // ignore_for_file: prefer_const_constructors
-
+import 'package:test_app/globals.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class EditShoppingListItem extends StatefulWidget {
+class EditShoppingList extends StatefulWidget {
   String title = "";
-  Map<String, Map<String, List<dynamic>>> shoppingLists = {};
-  EditShoppingListItem(this.title, this.shoppingLists, {super.key});
+  final ValueChanged<String> onTitleChanged;
+  EditShoppingList(this.title, {super.key, required this.onTitleChanged});
 
   @override
-  State<EditShoppingListItem> createState() => _EditShoppingListItemState();
+  State<EditShoppingList> createState() => _EditShoppingListState();
 }
 
-class _EditShoppingListItemState extends State<EditShoppingListItem> {
+class _EditShoppingListState extends State<EditShoppingList> {
+    Map shoppingLists = {};
   @override
+  void initState()
+  {
+    super.initState();
+    shoppingLists = ShoppingListPreferences.getShoppingLists();
+  }  
+
   Widget build(BuildContext context) {
     final itemName = TextEditingController(text: widget.title);
     return Scaffold(
@@ -20,7 +28,7 @@ class _EditShoppingListItemState extends State<EditShoppingListItem> {
         appBar: AppBar(
           elevation: 0,
           iconTheme: IconThemeData(color: Color.fromARGB(230, 65, 65, 65)),
-          title: const Text('Add an Item to list',
+          title: const Text('Edit Shoppinglist',
               style: TextStyle(color: Color.fromARGB(230, 65, 65, 65))),
           backgroundColor: Color.fromARGB(255, 245, 245, 245),
         ),
@@ -33,7 +41,7 @@ class _EditShoppingListItemState extends State<EditShoppingListItem> {
                   style: TextStyle(fontSize: 18),
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    hintText: "Enter the item name",
+                    hintText: "Enter the new list name",
                     enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.black26),
                     ),
@@ -48,6 +56,7 @@ class _EditShoppingListItemState extends State<EditShoppingListItem> {
               onPressed: () {
                 editItem(itemName.text);
                 Navigator.pop(context);
+                widget.onTitleChanged(itemName.text);
               },
             ),
           )
@@ -55,20 +64,21 @@ class _EditShoppingListItemState extends State<EditShoppingListItem> {
   }
 
   void editItem(String newName) {
-    Map<String, Map<String, List<dynamic>>> newShoppingLists = {};
-    List oldkeyList = widget.shoppingLists.keys.toList();
-    List keyList = widget.shoppingLists.keys.toList();
+    Map newShoppingLists = {};
+    List oldkeyList = shoppingLists.keys.toList();
+    List keyList = shoppingLists.keys.toList();
     int index = calcIndex(newName, keyList);
     keyList[index] = newName;
 
     for (int i = 0; i < keyList.length; i++) {
-      newShoppingLists[keyList[i]] = widget.shoppingLists[oldkeyList[i]]!;
+      newShoppingLists[keyList[i]] = shoppingLists[oldkeyList[i]]!;
     }
 
-    widget.shoppingLists.clear();
-    for (final String idx in keyList) {
-      widget.shoppingLists[idx] = newShoppingLists[idx]!;
+    shoppingLists = {};
+    for (String idx in keyList) {
+      shoppingLists[idx] = newShoppingLists[idx]!;
     }
+    ShoppingListPreferences.setShoppingLists(shoppingLists);
   }
 
   int calcIndex(String newName, List keyList) {

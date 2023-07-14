@@ -1,10 +1,12 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:test_app/globals.dart';
 
 class AddShoppingList extends StatefulWidget {
-  Map<String, Map<String, List>> shoppingLists = {};
-  AddShoppingList(this.shoppingLists, {super.key});
+  Map shoppingLists = {};
+  final Function() notifyParent;
+  AddShoppingList(this.notifyParent, {super.key});
   @override
   State<AddShoppingList> createState() => _AddShoppingListState();
 }
@@ -53,7 +55,7 @@ class _AddShoppingListState extends State<AddShoppingList> {
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(primary: Colors.purple),
               child: Text("Add new Shopping List"),
-              onPressed: () {
+              onPressed: () async {
                 addShoppingList();
                 Navigator.pop(
                     context);
@@ -65,7 +67,11 @@ class _AddShoppingListState extends State<AddShoppingList> {
     );
   }
 
-  void addShoppingList() {
+  void addShoppingList() async {
+    widget.shoppingLists = ShoppingListPreferences.getShoppingLists();
     widget.shoppingLists[shoppingListName.text] = {};
+    await ShoppingListPreferences.setShoppingLists(widget.shoppingLists);
+    setState(() {
+    });
   }
 }

@@ -1,14 +1,16 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:test_app/screens/shopping_list/shopping_lists_view.dart';
 import 'screens/menu/menu_view.dart';
 import 'screens/meal_list.dart/meal_list_view.dart';
+import 'globals.dart';
 
 class ShoppingListApp extends StatelessWidget {
-  const ShoppingListApp({super.key});
-
+  ShoppingListApp({super.key});
   @override
+
   Widget build(BuildContext context) {
     return MaterialApp(
       home: HomeScreen(),
@@ -26,9 +28,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _index = 0;
 
-  int idxShoppingLists = 0;
-  int idxMenus = 1;
-
   void _onItemTapped(int index) {
     setState(() {
       _index = index;
@@ -36,9 +35,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  
+
   Widget build(BuildContext context) {
     List widgetOptions = [
-      ShoppingListHome(shoppingLists),
+      ShoppingListHome(),
       MenuHome(),
       CalenderHome()
     ];
@@ -62,6 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ));
   }
 }
+
 
 
 Map<String, Map<String, List>> shoppingLists = {
@@ -94,6 +96,9 @@ Map<String, List> test3 = {
   'df': ["500g", false],
 };
 
-void main() {
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await ShoppingListPreferences.init();
+
   runApp(ShoppingListApp());
 }

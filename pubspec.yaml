@@ -38,6 +38,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   reorderable_grid_view: ^2.2.5
   sembast: ^3.3.1
+  shared_preferences: ^2.0.15
 
 dev_dependencies:
   flutter_test:

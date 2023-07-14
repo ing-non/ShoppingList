@@ -1,31 +1,49 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, must_be_immutable
 
+import 'dart:convert';
+import 'package:test_app/globals.dart';
 import 'package:flutter/material.dart';
 import 'package:reorderable_grid_view/reorderable_grid_view.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:test_app/main.dart';
 import 'add_list.dart';
 import 'shopping_list_view.dart';
 import 'edit_list.dart';
+import 'package:test_app/globals.dart';
 
 String shoppingListsName = "Shopping Lists";
 
-
 class ShoppingListHome extends StatefulWidget {
-  Map<String, Map<String, List>> shoppingLists = {};
-  ShoppingListHome(this.shoppingLists, {super.key});
+  const ShoppingListHome({super.key});
 
   @override
   State<ShoppingListHome> createState() => _ShoppingListHomeState();
 }
 
 class _ShoppingListHomeState extends State<ShoppingListHome> {
+  static double addListSize = 56;
+  Map shoppingLists = {};
+
   @override
-  void _deleteList(String key) {
-    widget.shoppingLists.remove(key);
-    setState(() {});
+  void initState() {
+    super.initState();
+    shoppingLists = ShoppingListPreferences.getShoppingLists();
   }
 
-  static double addListSize = 56;
+  void _deleteList(String key) {
+    shoppingLists.remove(key);
+    //TODOO: Restoring value before edit instead of direct delete
+    //(Stellt den Wert vor einer Bearbeitung wieder her und erst beim zweiten löschen wird das Element gelöscht)
+    ShoppingListPreferences.setShoppingLists(shoppingLists);
+  }
 
+  void refresh() {
+    setState(() {
+      shoppingLists = ShoppingListPreferences.getShoppingLists();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 245, 245, 245),
@@ -46,12 +64,14 @@ class _ShoppingListHomeState extends State<ShoppingListHome> {
                       borderRadius: BorderRadius.circular(addListSize / 2),
                       onTap: () {
                         Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        AddShoppingList(widget.shoppingLists)))
-                            .then((value) {
-                          setState(() {});
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => AddShoppingList(refresh)),
+                        ).then((value) {
+                          setState(() {
+                            shoppingLists =
+                                ShoppingListPreferences.getShoppingLists();
+                          });
                         });
                       },
                       child: Icon(
@@ -73,13 +93,12 @@ class _ShoppingListHomeState extends State<ShoppingListHome> {
               mainAxisSpacing: 20,
               childAspectRatio: (150 / 200),
               children: [
-                for (final list in widget.shoppingLists.keys)
+                for (final listTitle in shoppingLists.keys)
                   HomeScreenCard(
-                    key: ValueKey(list),
-                    list,
-                    widget.shoppingLists[list]!,
-                    widget.shoppingLists,
+                    listTitle,
+                    key: ValueKey(listTitle),
                     deleteList: _deleteList,
+                    notifyParent: refresh,
                   ),
               ],
               onReorder: (int oldIndex, int newIndex) {
@@ -87,16 +106,16 @@ class _ShoppingListHomeState extends State<ShoppingListHome> {
                   if (oldIndex < newIndex) {
                     newIndex -= 1;
                   }
-                  Map<String, Map<String, List<dynamic>>> newShoppingLists = {};
-                  List itemKeys = widget.shoppingLists.keys.toList();
+                  Map newShoppingLists = {};
+                  List itemKeys = shoppingLists.keys.toList();
                   final String item = itemKeys.removeAt(oldIndex);
                   itemKeys.insert(newIndex, item);
 
                   for (final index in itemKeys) {
-                    newShoppingLists[index] = widget.shoppingLists[index]!;
+                    newShoppingLists[index] = shoppingLists[index]!;
                   }
-
-                  widget.shoppingLists = newShoppingLists;
+                  shoppingLists = newShoppingLists;
+                  ShoppingListPreferences.setShoppingLists(shoppingLists);
                 });
               }),
         ),
@@ -106,21 +125,18 @@ class _ShoppingListHomeState extends State<ShoppingListHome> {
 }
 
 class HomeScreenCard extends StatefulWidget {
-  final title;
-  final Map<String, List<dynamic>> shoppingList;
-  Map<String, Map<String, List<dynamic>>> shoppingLists;
+  String title;
+  final Function deleteList;
+  final Function notifyParent;
 
-  final deleteList;
-
-  HomeScreenCard(this.title, this.shoppingList, this.shoppingLists,
-      {super.key, this.deleteList});
+  HomeScreenCard(this.title,
+      {super.key, required this.deleteList, required this.notifyParent});
 
   @override
   State<HomeScreenCard> createState() => _HomeScreenCardState();
 }
 
 class _HomeScreenCardState extends State<HomeScreenCard> {
-  static double subTextSize = 15;
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -149,37 +165,6 @@ class _HomeScreenCardState extends State<HomeScreenCard> {
             SizedBox(
               height: 10,
             ),
-            if (widget.shoppingList.length >= 3) ...[
-              Align(
-                  alignment: Alignment.centerLeft,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "${widget.shoppingList.keys.toList()[0].toString()} : ${widget.shoppingList.values.toList()[0][0].toString()}",
-                        style: TextStyle(fontSize: subTextSize),
-                      ),
-                      Text(
-                        "${widget.shoppingList.keys.toList()[1].toString()} : ${widget.shoppingList.values.toList()[1][0].toString()}",
-                        style: TextStyle(fontSize: subTextSize),
-                      ),
-                      Text(
-                        "${widget.shoppingList.keys.toList()[2].toString()} : ${widget.shoppingList.values.toList()[2][0].toString()}",
-                        style: TextStyle(fontSize: subTextSize),
-                      ),
-                    ],
-                  ))
-            ] else ...[
-              for (final list in widget.shoppingList.keys)
-                Align(
-                    alignment: Alignment.centerLeft,
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                              "${list} : ${widget.shoppingList.values.toList()[0][0].toString()}"),
-                        ])),
-            ],
             Spacer(flex: 1),
             Row(
               children: [
@@ -187,12 +172,15 @@ class _HomeScreenCardState extends State<HomeScreenCard> {
                   child: Icon(Icons.edit),
                   onTap: () {
                     Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => EditShoppingListItem(
-                                    widget.title, widget.shoppingLists)))
-                        .then((value) {
-                      setState() {}
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                EditShoppingList(onTitleChanged: (newTitle) {
+                                  setState(() {
+                                    widget.title = newTitle;
+                                  });
+                                }, widget.title))).then((value) {
+                      widget.notifyParent;
                     });
                   },
                 ),
@@ -221,9 +209,12 @@ class _HomeScreenCardState extends State<HomeScreenCard> {
                             ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                     primary: Colors.red),
-                                onPressed: () {
-                                  Navigator.pop(context);
+                                onPressed: () async {
                                   widget.deleteList(widget.title);
+                                  setState(() {
+                                    widget.notifyParent();
+                                  });
+                                  Navigator.pop(context);
                                 },
                                 child: Text("Delete?")),
                           ],
@@ -240,13 +231,9 @@ class _HomeScreenCardState extends State<HomeScreenCard> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  ShoppingListView(widget.shoppingList, widget.title),
+              builder: (context) => ShoppingListView(widget.title),
             ),
           );
         });
   }
 }
-
-
-
