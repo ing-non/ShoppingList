@@ -32,16 +32,16 @@ class ShoppingListViewState extends State<ShoppingListView> {
       shoppingList = shoppingLists[widget.title];
       shoppingListItems = shoppingList.values.toList();
     });
-    print(shoppingList);
   }
 
-  void delete_item(String key) {
+  void deleteItem(String key) {
     shoppingList.remove(key);
     shoppingLists[widget.title] = shoppingList;
     ShoppingListPreferences.setShoppingLists(shoppingLists);
     refresh();
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
@@ -188,9 +188,9 @@ class ShoppingListViewState extends State<ShoppingListView> {
                                   ),
                                   ElevatedButton(
                                       style: ElevatedButton.styleFrom(
-                                          primary: Colors.red),
+                                          backgroundColor: Colors.red),
                                       onPressed: () {
-                                        delete_item(
+                                        deleteItem(
                                             shoppingList.keys.toList()[index]);
                                         Navigator.pop(context);
                                       },

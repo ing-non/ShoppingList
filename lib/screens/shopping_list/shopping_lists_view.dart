@@ -1,15 +1,11 @@
 // ignore_for_file: prefer_const_constructors, must_be_immutable
 
-import 'dart:convert';
 import 'package:test_app/globals.dart';
 import 'package:flutter/material.dart';
 import 'package:reorderable_grid_view/reorderable_grid_view.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:test_app/main.dart';
 import 'add_list.dart';
 import 'shopping_list_view.dart';
 import 'edit_list.dart';
-import 'package:test_app/globals.dart';
 
 String shoppingListsName = "Shopping Lists";
 

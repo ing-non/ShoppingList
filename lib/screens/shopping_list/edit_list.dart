@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_const_constructors
+
 import 'package:test_app/globals.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class EditShoppingList extends StatefulWidget {
   String title = "";
@@ -20,6 +20,7 @@ class _EditShoppingListState extends State<EditShoppingList> {
     shoppingLists = ShoppingListPreferences.getShoppingLists();
   }
 
+  @override
   Widget build(BuildContext context) {
     final itemName = TextEditingController(text: widget.title);
     return Scaffold(
@@ -50,7 +51,7 @@ class _EditShoppingListState extends State<EditShoppingList> {
           Container(
             padding: EdgeInsets.all(20),
             child: ElevatedButton(
-              style: ElevatedButton.styleFrom(primary: Colors.purple),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
               child: Text("Edit List"),
               onPressed: () {
                 editItem(itemName.text);

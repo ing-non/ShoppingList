@@ -20,6 +20,7 @@ class _AddShoppingListState extends State<AddShoppingList> {
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 245, 245, 245),
@@ -53,7 +54,7 @@ class _AddShoppingListState extends State<AddShoppingList> {
           Container(
             padding: EdgeInsets.all(20),
             child: ElevatedButton(
-              style: ElevatedButton.styleFrom(primary: Colors.purple),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
               child: Text("Add new Shopping List"),
               onPressed: () async {
                 addShoppingList();

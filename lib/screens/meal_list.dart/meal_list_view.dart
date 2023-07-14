@@ -1,9 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'add_meal_list.dart';
 
 String mealListName = "Meal list";
@@ -16,8 +13,9 @@ class CalenderHome extends StatefulWidget {
 }
 
 class _CalenderHomeState extends State<CalenderHome> {
-  @override
   static double addListSize = 56;
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 245, 245, 245),
@@ -38,10 +36,9 @@ class _CalenderHomeState extends State<CalenderHome> {
                       borderRadius: BorderRadius.circular(addListSize / 2),
                       onTap: () {
                         Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => AddMeal()))
-                            .then((value) {
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => AddMeal())).then((value) {
                           setState(() {});
                         });
                       },
@@ -57,5 +54,3 @@ class _CalenderHomeState extends State<CalenderHome> {
     );
   }
 }
-
-

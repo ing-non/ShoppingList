@@ -9,7 +9,7 @@ class EditShoppingListItem extends StatefulWidget {
   final String title;
   final int index;
 
-  EditShoppingListItem(
+  const EditShoppingListItem(
       this.currentName, this.currentAmount, this.title, this.index,
       {super.key});
 
@@ -22,6 +22,7 @@ class _EditShoppingListItemState extends State<EditShoppingListItem> {
   Map shoppingList = {};
   var textFieldErrorText = null;
 
+  @override
   void initState() {
     super.initState();
     shoppingLists = ShoppingListPreferences.getShoppingLists();
@@ -76,7 +77,7 @@ class _EditShoppingListItemState extends State<EditShoppingListItem> {
           Container(
             padding: EdgeInsets.all(20),
             child: ElevatedButton(
-              style: ElevatedButton.styleFrom(primary: Colors.purple),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
               child: Text("Edit item"),
               onPressed: () {
                 editItem(widget.index, itemName.text, amount.text);

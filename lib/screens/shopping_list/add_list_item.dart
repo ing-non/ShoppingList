@@ -19,6 +19,7 @@ class _AddShoppingListItemState extends State<AddShoppingListItem> {
   final amount = TextEditingController();
   var textFieldErrorText = null;
 
+  @override
   void initState() {
     super.initState();
     shoppingLists = ShoppingListPreferences.getShoppingLists();
@@ -32,6 +33,7 @@ class _AddShoppingListItemState extends State<AddShoppingListItem> {
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Color.fromARGB(255, 245, 245, 245),
@@ -77,7 +79,7 @@ class _AddShoppingListItemState extends State<AddShoppingListItem> {
           Container(
             padding: EdgeInsets.all(20),
             child: ElevatedButton(
-              style: ElevatedButton.styleFrom(primary: Colors.purple),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
               child: Text("Add Item to list"),
               onPressed: () async {
                 addItem();

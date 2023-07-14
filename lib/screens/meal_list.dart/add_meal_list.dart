@@ -47,7 +47,7 @@ class _AddMealState extends State<AddMeal> {
           Container(
             padding: EdgeInsets.all(20),
             child: ElevatedButton(
-              style: ElevatedButton.styleFrom(primary: Colors.purple),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
               child: Text("Add Item to list"),
               onPressed: () {
                 //Navigator.pop(context); Automatic return to list on button pressed, not always helpful
