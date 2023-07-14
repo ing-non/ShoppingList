@@ -10,7 +10,6 @@ import 'globals.dart';
 class ShoppingListApp extends StatelessWidget {
   ShoppingListApp({super.key});
   @override
-
   Widget build(BuildContext context) {
     return MaterialApp(
       home: HomeScreen(),
@@ -35,14 +34,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  
-
   Widget build(BuildContext context) {
-    List widgetOptions = [
-      ShoppingListHome(),
-      MenuHome(),
-      CalenderHome()
-    ];
+    List widgetOptions = [ShoppingListHome(), MenuHome(), CalenderHome()];
 
     return Scaffold(
         body: widgetOptions.elementAt(_index),
@@ -63,38 +56,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ));
   }
 }
-
-
-
-Map<String, Map<String, List>> shoppingLists = {
-  'firstShoppingList': test,
-  'secondShoppingList': test,
-  'thirdShoppingList': test2,
-  'thiardShopppingList': test3,
-  'thirdShfopppingList': test2,
-  'thirdShopfppingList': test2,
-  'thirdShoppfpingList': test2,
-};
-
-Map<String, List> test = {
-  'f': ["400g", false],
-  'bar': ["400g", false],
-  'asd': ["400g", false],
-  'df': ["500g", false],
-  'dsaf': ["400g", false],
-  'a': ["400g", false],
-  'ad': ["400g", false],
-  'foo': ["400g", true],
-};
-
-Map<String, List> test2 = {
-  'df': ["500g", false],
-  'dasdff': ["500g", false],
-};
-
-Map<String, List> test3 = {
-  'df': ["500g", false],
-};
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();

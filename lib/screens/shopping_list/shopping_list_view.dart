@@ -6,7 +6,6 @@ import 'add_list_item.dart';
 import 'edit_list_item.dart';
 
 class ShoppingListView extends StatefulWidget {
-
   String title;
   ShoppingListView(this.title, {super.key});
   @override
@@ -27,7 +26,7 @@ class ShoppingListViewState extends State<ShoppingListView> {
     shoppingListItems = shoppingList.values.toList();
   }
 
-  void refresh(){
+  void refresh() {
     setState(() {
       shoppingLists = ShoppingListPreferences.getShoppingLists();
       shoppingList = shoppingLists[widget.title];
@@ -65,8 +64,9 @@ class ShoppingListViewState extends State<ShoppingListView> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                AddShoppingListItem(widget.title, notifyParent: refresh),
+                            builder: (context) => AddShoppingListItem(
+                                widget.title,
+                                notifyParent: refresh),
                           ),
                         ).then((value) {
                           setState(() {
@@ -109,18 +109,15 @@ class ShoppingListViewState extends State<ShoppingListView> {
                             title: Text(
                               "${index + 1} ${shoppingList.keys.toList()[index]}",
                               style: TextStyle(
-                                  fontWeight:
-                                      shoppingListItems[index][1]
-                                          ? FontWeight.normal
-                                          : FontWeight.bold,
-                                  decoration:
-                                      shoppingListItems[index][1]
-                                          ? TextDecoration.lineThrough
-                                          : null,
+                                  fontWeight: shoppingListItems[index][1]
+                                      ? FontWeight.normal
+                                      : FontWeight.bold,
+                                  decoration: shoppingListItems[index][1]
+                                      ? TextDecoration.lineThrough
+                                      : null,
                                   decorationThickness: 4),
                             ),
-                            subtitle: Text(
-                               "${shoppingListItems[index][0]}",
+                            subtitle: Text("${shoppingListItems[index][0]}",
                                 style: TextStyle(
                                     decoration: shoppingListItems[index][1]
                                         ? TextDecoration.lineThrough
@@ -129,11 +126,12 @@ class ShoppingListViewState extends State<ShoppingListView> {
                             value: shoppingListItems[index][1],
                             onChanged: (bool? newValue) {
                               setState(() {
-                                shoppingListItems[index][1] =
+                                shoppingListItems[index][1] = newValue;
+                                shoppingList.values.toList()[index][1] =
                                     newValue;
-                                shoppingList.values.toList()[index][1] = newValue;
                                 shoppingLists[widget.title] = shoppingList;
-                                ShoppingListPreferences.setShoppingLists(shoppingLists);
+                                ShoppingListPreferences.setShoppingLists(
+                                    shoppingLists);
                               });
                             },
                             secondary: Row(

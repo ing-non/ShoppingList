@@ -15,11 +15,11 @@ class _AddShoppingListState extends State<AddShoppingList> {
   final shoppingListName = TextEditingController();
   var textFieldErrorText = null;
   @override
-
-  void dispose(){
+  void dispose() {
     shoppingListName.dispose();
     super.dispose();
   }
+
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 245, 245, 245),
@@ -57,8 +57,7 @@ class _AddShoppingListState extends State<AddShoppingList> {
               child: Text("Add new Shopping List"),
               onPressed: () async {
                 addShoppingList();
-                Navigator.pop(
-                    context);
+                Navigator.pop(context);
               },
             ),
           )
@@ -71,7 +70,6 @@ class _AddShoppingListState extends State<AddShoppingList> {
     widget.shoppingLists = ShoppingListPreferences.getShoppingLists();
     widget.shoppingLists[shoppingListName.text] = {};
     await ShoppingListPreferences.setShoppingLists(widget.shoppingLists);
-    setState(() {
-    });
+    setState(() {});
   }
 }

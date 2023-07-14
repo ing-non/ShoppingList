@@ -19,8 +19,7 @@ class _AddShoppingListItemState extends State<AddShoppingListItem> {
   final amount = TextEditingController();
   var textFieldErrorText = null;
 
-  void initState()
-  {
+  void initState() {
     super.initState();
     shoppingLists = ShoppingListPreferences.getShoppingLists();
     shoppingList = shoppingLists[widget.title];
@@ -80,7 +79,7 @@ class _AddShoppingListItemState extends State<AddShoppingListItem> {
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(primary: Colors.purple),
               child: Text("Add Item to list"),
-              onPressed: () async{
+              onPressed: () async {
                 addItem();
                 //Navigator.pop(context); Automatic return to list on button pressed, not always helpful
               },

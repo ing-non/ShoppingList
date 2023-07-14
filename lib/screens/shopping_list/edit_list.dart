@@ -13,13 +13,12 @@ class EditShoppingList extends StatefulWidget {
 }
 
 class _EditShoppingListState extends State<EditShoppingList> {
-    Map shoppingLists = {};
+  Map shoppingLists = {};
   @override
-  void initState()
-  {
+  void initState() {
     super.initState();
     shoppingLists = ShoppingListPreferences.getShoppingLists();
-  }  
+  }
 
   Widget build(BuildContext context) {
     final itemName = TextEditingController(text: widget.title);

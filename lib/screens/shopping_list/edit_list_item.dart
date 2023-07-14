@@ -2,14 +2,15 @@
 
 import 'package:flutter/material.dart';
 import 'package:test_app/globals.dart';
+
 class EditShoppingListItem extends StatefulWidget {
   final String currentName;
   final String currentAmount;
   final String title;
   final int index;
 
-EditShoppingListItem(
-      this.currentName, this.currentAmount, this.title, this.index, 
+  EditShoppingListItem(
+      this.currentName, this.currentAmount, this.title, this.index,
       {super.key});
 
   @override
@@ -21,12 +22,11 @@ class _EditShoppingListItemState extends State<EditShoppingListItem> {
   Map shoppingList = {};
   var textFieldErrorText = null;
 
-  void initState()
-  {
+  void initState() {
     super.initState();
     shoppingLists = ShoppingListPreferences.getShoppingLists();
     shoppingList = shoppingLists[widget.title];
-  }  
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,21 +92,17 @@ class _EditShoppingListItemState extends State<EditShoppingListItem> {
     List oldlistKeys = shoppingList.keys.toList();
     List listKeys = shoppingList.keys.toList();
     listKeys[index] = newName;
-    for (int i = 0; i < listKeys.length; i++)
-    {
-      if (listKeys[i] == newName)
-      {
+    for (int i = 0; i < listKeys.length; i++) {
+      if (listKeys[i] == newName) {
         bool checkValue = shoppingList[oldlistKeys[i]]![1];
         newShoppingList[listKeys[i]] = [newAmount, checkValue];
-      }
-      else{
-      newShoppingList[listKeys[i]] = shoppingList[listKeys[i]]!;
+      } else {
+        newShoppingList[listKeys[i]] = shoppingList[listKeys[i]]!;
       }
     }
 
     shoppingList.clear();
-    for (final String idx in listKeys)
-    {
+    for (final String idx in listKeys) {
       shoppingList[idx] = newShoppingList[idx]!;
     }
 
