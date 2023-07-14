@@ -1,14 +1,13 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'package:test_app/screens/shopping_list/shopping_lists_view.dart';
 import 'screens/menu/menu_view.dart';
 import 'screens/meal_list.dart/meal_list_view.dart';
 import 'globals.dart';
 
 class ShoppingListApp extends StatelessWidget {
-  ShoppingListApp({super.key});
+  const ShoppingListApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
