@@ -4,9 +4,9 @@ import 'package:test_app/globals.dart';
 import 'package:flutter/material.dart';
 
 class EditShoppingList extends StatefulWidget {
-  String title = "";
+  final String title;
   final ValueChanged<String> onTitleChanged;
-  EditShoppingList(this.title, {super.key, required this.onTitleChanged});
+  const EditShoppingList(this.title, {super.key, required this.onTitleChanged});
 
   @override
   State<EditShoppingList> createState() => _EditShoppingListState();
@@ -54,7 +54,7 @@ class _EditShoppingListState extends State<EditShoppingList> {
               style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
               child: Text("Edit List"),
               onPressed: () {
-                editItem(itemName.text);
+                editList(itemName.text);
                 Navigator.pop(context);
                 widget.onTitleChanged(itemName.text);
               },
@@ -63,31 +63,25 @@ class _EditShoppingListState extends State<EditShoppingList> {
         ])));
   }
 
-  void editItem(String newName) {
+  void editList(String newName) {
     Map newShoppingLists = {};
     List oldkeyList = shoppingLists.keys.toList();
     List keyList = shoppingLists.keys.toList();
-    int index = calcIndex(newName, keyList);
+    int index = calcIndex(newName, oldkeyList);
     keyList[index] = newName;
-
     for (int i = 0; i < keyList.length; i++) {
       newShoppingLists[keyList[i]] = shoppingLists[oldkeyList[i]]!;
     }
-
-    shoppingLists = {};
-    for (String idx in keyList) {
-      shoppingLists[idx] = newShoppingLists[idx]!;
-    }
+    shoppingLists = newShoppingLists;
     ShoppingListPreferences.setShoppingLists(shoppingLists);
   }
 
   int calcIndex(String newName, List keyList) {
-    int index = 0;
-    while (true) {
+    for(int index = 0; index < keyList.length; index++) {
       if (widget.title == keyList[index]) {
         return index;
       }
-      index++;
     }
+    return -1;
   }
 }

@@ -27,9 +27,8 @@ class _ShoppingListHomeState extends State<ShoppingListHome> {
   }
 
   void _deleteList(String key) {
+    shoppingLists = ShoppingListPreferences.getShoppingLists();
     shoppingLists.remove(key);
-    //TODOO: Restoring value before edit instead of direct delete
-    //(Stellt den Wert vor einer Bearbeitung wieder her und erst beim zweiten löschen wird das Element gelöscht)
     ShoppingListPreferences.setShoppingLists(shoppingLists);
   }
 
@@ -176,6 +175,7 @@ class _HomeScreenCardState extends State<HomeScreenCard> {
                                     widget.title = newTitle;
                                   });
                                 }, widget.title))).then((value) {
+
                       widget.notifyParent;
                     });
                   },

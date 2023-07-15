@@ -71,8 +71,7 @@ class ShoppingListViewState extends State<ShoppingListView> {
                         ).then((value) {
                           setState(() {
                             shoppingLists =
-                                ShoppingListPreferences.getShoppingListItem(
-                                    widget.title);
+                                ShoppingListPreferences.getShoppingLists();
                           });
                         });
                       },

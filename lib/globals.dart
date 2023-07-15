@@ -22,18 +22,4 @@ class ShoppingListPreferences {
       return {};
     }
   }
-
-  static Future setShoppingListItem(Map shoppingListItem, String key) async {
-    final strShoppingListItem = json.encode(shoppingListItem);
-    await _preferences.setString(key, strShoppingListItem);
-  }
-
-  static Map getShoppingListItem(String key) {
-    final shoppingListItem = _preferences.getString(key) ?? "{}";
-    return json.decode(shoppingListItem);
-  }
-
-  static void removeByKey(String key) {
-    _preferences.remove(key);
-  }
 }
