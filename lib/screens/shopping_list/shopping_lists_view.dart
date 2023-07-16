@@ -132,6 +132,22 @@ class HomeScreenCard extends StatefulWidget {
 }
 
 class _HomeScreenCardState extends State<HomeScreenCard> {
+  Map shoppingLists = {};
+  Map shoppingList = {};
+  final double subTextSize = 15;
+  void initState() {
+    super.initState();
+    shoppingLists = ShoppingListPreferences.getShoppingLists();
+    shoppingList = shoppingLists[widget.title];
+  }
+
+  void refresh() {
+    setState(() {
+      shoppingLists = ShoppingListPreferences.getShoppingLists();
+      shoppingList = shoppingLists[widget.title];
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -160,6 +176,35 @@ class _HomeScreenCardState extends State<HomeScreenCard> {
             SizedBox(
               height: 10,
             ),
+            if (shoppingList.values.toList().length > 5) ...[
+              Align(
+                  alignment: Alignment.centerLeft,
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (int i = 0; i < 5; i++) ...[
+                          Text(
+                            "${shoppingList.keys.toList()[i].toString()} : ${shoppingList.values.toList()[i][0].toString()}",
+                            style: TextStyle(fontSize: subTextSize),
+                          ),
+                        ],
+                        Text("...")
+                      ]))
+            ] else ...[
+              for (int i = 0; i < shoppingList.values.toList().length; i++) ...[
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Column(
+                    children: [
+                      Text(
+                        "${shoppingList.keys.toList()[i].toString()} : ${shoppingList.values.toList()[i][0].toString()}",
+                        style: TextStyle(fontSize: subTextSize),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
             Spacer(flex: 1),
             Row(
               children: [
@@ -175,7 +220,6 @@ class _HomeScreenCardState extends State<HomeScreenCard> {
                                     widget.title = newTitle;
                                   });
                                 }, widget.title))).then((value) {
-
                       widget.notifyParent;
                     });
                   },
@@ -229,7 +273,7 @@ class _HomeScreenCardState extends State<HomeScreenCard> {
             MaterialPageRoute(
               builder: (context) => ShoppingListView(widget.title),
             ),
-          );
+          ).then((value) => refresh());
         });
   }
 }
