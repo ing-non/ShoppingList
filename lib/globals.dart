@@ -53,7 +53,7 @@ class MenuStoragePreferences {
     await _preferences.setStringList(mealKey, meals);
   }
 
-  static List<String>? getMenus()
+  static List<String>? getMeals()
   {
     return _preferences.getStringList(mealKey);
   }

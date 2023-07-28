@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:test_app/globals.dart';
+import 'package:test_app/logic/createNewMenu.dart';
 
 String menuName = "Menu";
 
@@ -18,7 +19,7 @@ class _MenuHomeState extends State<MenuHome> {
   late Random random;
   late List<String>? meals;
   late Map allTimeMenus;
-  final dtNow = DateTime.now();
+  final dtNow = DateUtils.dateOnly(DateTime.now());
   final List weekdays = [
     "Monday",
     "Tuesday",
@@ -28,63 +29,46 @@ class _MenuHomeState extends State<MenuHome> {
     "Saturday",
     "Sunday"
   ];
+
   @override
   void initState() {
     super.initState();
     random = Random();
-    meals = MenuStoragePreferences.getMenus();
+    meals = MenuStoragePreferences.getMeals();
     allTimeMenus = MenuStoragePreferences.getAllTimeMenusPerWeek();
     pageViewController =
-        PageController(initialPage: allTimeMenus.keys.toList().length);
+      PageController(initialPage: allTimeMenus.keys.toList().length);
+
+    CreateNewMenu createMenu = CreateNewMenu(allTimeMenus);
+    List weeklyMenu = createMenu.getWeeklyMenu(setStartDateToMonday(dtNow));
+    allTimeMenus[setStartDateToMonday(dtNow).toString()] = weeklyMenu;
+
+    MenuStoragePreferences.setAllTimeMenusPerWeek(allTimeMenus);
   }
 
   @override
-  void dispose() {
+    void dispose() {
     pageViewController.dispose();
     super.dispose();
   }
 
-
-  DateTime setStartDateToMonday(DateTime start) {
+  DateTime setStartDateToMonday(DateTime startDate) {
     while (true) 
     {
-      if (start.weekday != 1) 
+      if (startDate.weekday != 1) 
       {
-        start = start.subtract(Duration(days: 1));
+        startDate = startDate.subtract(Duration(days: 1));
       } 
       else 
       {
         break;
       }
     }
-    return start;
-  }
-
-  List createWeeklyMenu(List<String>? meals) {
-    List menu = [];
-    for (int i = 0; i < 7; i++) {
-      menu.add(meals![Random().nextInt(7)]);
-    }
-    return menu;
-  }
-
-  void allTimeMenu(DateTime startDate) {
-    List weeklyMenu = [];
-    for (int i = 0; i < 2; i++) {
-      weeklyMenu = createWeeklyMenu(meals);
-      if (!allTimeMenus.containsKey(startDate)) {
-        allTimeMenus[startDate.toString()] = weeklyMenu;
-      } else {
-        allTimeMenus[startDate.add(Duration(days: 7))] = weeklyMenu;
-      }
-    }
+    return startDate;
   }
 
   @override
   Widget build(BuildContext context) {
-    DateTime startDate =
-        setStartDateToMonday(DateTime.utc(dtNow.year, dtNow.month, dtNow.day));
-    allTimeMenu(startDate);
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 245, 245, 245),
       appBar: AppBar(
