@@ -135,6 +135,7 @@ class _HomeScreenCardState extends State<HomeScreenCard> {
   Map shoppingLists = {};
   Map shoppingList = {};
   final double subTextSize = 15;
+  @override
   void initState() {
     super.initState();
     shoppingLists = ShoppingListPreferences.getShoppingLists();
