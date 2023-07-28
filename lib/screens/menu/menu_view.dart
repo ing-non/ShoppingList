@@ -2,29 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:test_app/globals.dart';
 
 String menuName = "Menu";
-
-Map allTimeMenus = {
-  DateTime.utc(2022, 10, 17): [
-    "Soup",
-    "Bolognese",
-    "Pancakes",
-    "Potatoes",
-    "Salmon",
-    "Carbonarra",
-    "Chicken"
-  ],
-  DateTime.utc(2022, 10, 24): [
-    "Chicken",
-    "Bolognese",
-    "Carbonarra",
-    "Potatoes",
-    "Salmon",
-    "Pancakes",
-    "Soup"
-  ]
-};
 
 class MenuHome extends StatefulWidget {
   const MenuHome({super.key});
@@ -34,22 +14,11 @@ class MenuHome extends StatefulWidget {
 }
 
 class _MenuHomeState extends State<MenuHome> {
-  PageController pageViewController = PageController();
-  @override
-  void initState() {
-    super.initState();
-    pageViewController = PageController(initialPage: 1);
-  }
-
-  @override
-  void dispose() {
-    pageViewController.dispose();
-    super.dispose();
-  }
-
-  @override
+  late PageController pageViewController;
+  late Random random;
+  late List<String>? meals;
+  late Map allTimeMenus;
   final dtNow = DateTime.now();
-  static double addListSize = 56;
   final List weekdays = [
     "Monday",
     "Tuesday",
@@ -59,56 +28,63 @@ class _MenuHomeState extends State<MenuHome> {
     "Saturday",
     "Sunday"
   ];
-  final List meals = [
-    "Salmon",
-    "Bolognese",
-    "Carbonarra",
-    "Potatoes",
-    "Chicken",
-    "Pancakes",
-    "Soup"
-  ];
+  @override
+  void initState() {
+    super.initState();
+    random = Random();
+    meals = MenuStoragePreferences.getMenus();
+    allTimeMenus = MenuStoragePreferences.getAllTimeMenusPerWeek();
+    pageViewController =
+        PageController(initialPage: allTimeMenus.keys.toList().length);
+  }
 
-  var random = Random();
+  @override
+  void dispose() {
+    pageViewController.dispose();
+    super.dispose();
+  }
 
-  DateTime startDateToMonday(DateTime start) {
-    while (true) {
-      if (start.weekday != 1) {
+
+  DateTime setStartDateToMonday(DateTime start) {
+    while (true) 
+    {
+      if (start.weekday != 1) 
+      {
         start = start.subtract(Duration(days: 1));
-      } else {
+      } 
+      else 
+      {
         break;
       }
     }
     return start;
   }
 
-  List createWeeklyMenu(List weekdays, List meals) {
+  List createWeeklyMenu(List<String>? meals) {
     List menu = [];
-    for (int i = 0; i < weekdays.length; i++) {
-      menu.add(meals[Random().nextInt(7)]);
+    for (int i = 0; i < 7; i++) {
+      menu.add(meals![Random().nextInt(7)]);
     }
     return menu;
   }
 
-  void allTimeMenu(DateTime start) {
+  void allTimeMenu(DateTime startDate) {
     List weeklyMenu = [];
     for (int i = 0; i < 2; i++) {
-      weeklyMenu = createWeeklyMenu(weekdays, meals);
-      if (!allTimeMenus.containsKey(start)) {
-        allTimeMenus[start] = weeklyMenu;
+      weeklyMenu = createWeeklyMenu(meals);
+      if (!allTimeMenus.containsKey(startDate)) {
+        allTimeMenus[startDate.toString()] = weeklyMenu;
       } else {
-        allTimeMenus[start.add(Duration(days: 7))] = weeklyMenu;
+        allTimeMenus[startDate.add(Duration(days: 7))] = weeklyMenu;
       }
     }
-    pageViewController =
-        PageController(initialPage: allTimeMenus.keys.toList().length - 2);
   }
 
   @override
   Widget build(BuildContext context) {
-    DateTime start =
-        startDateToMonday(DateTime.utc(dtNow.year, dtNow.month, dtNow.day));
-    allTimeMenu(start);
+    DateTime startDate =
+        setStartDateToMonday(DateTime.utc(dtNow.year, dtNow.month, dtNow.day));
+    allTimeMenu(startDate);
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 245, 245, 245),
       appBar: AppBar(
@@ -127,7 +103,7 @@ class _MenuHomeState extends State<MenuHome> {
             ),
             Center(
               child: Text(
-                "${date.day}.${date.month}.${date.year} - ${date.add(Duration(days: 6)).day}.${date.add(Duration(days: 6)).month}.${date.add(Duration(days: 6)).year}",
+                "${DateTime.parse(date).day}.${DateTime.parse(date).month}.${DateTime.parse(date).year} - ${DateTime.parse(date).add(Duration(days: 6)).day}.${DateTime.parse(date).add(Duration(days: 6)).month}.${DateTime.parse(date).add(Duration(days: 6)).year}",
                 style: TextStyle(fontSize: 20),
               ),
             ),
@@ -137,7 +113,7 @@ class _MenuHomeState extends State<MenuHome> {
             for (int i = 0; i < 7; i++)
               ListTile(
                 leading: Text(
-                    "${weekdays[i]}, ${date.add(Duration(days: i)).day}-${date.add(Duration(days: i)).month}-${date.add(Duration(days: i)).year}"),
+                    "${weekdays[i]}, ${DateTime.parse(date).add(Duration(days: i)).day}-${DateTime.parse(date).add(Duration(days: i)).month}-${DateTime.parse(date).add(Duration(days: i)).year}"),
                 trailing: Text("${allTimeMenus[date][i]}"),
               )
           ]),

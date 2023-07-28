@@ -23,3 +23,38 @@ class ShoppingListPreferences {
     }
   }
 }
+
+class MenuStoragePreferences {
+  static late SharedPreferences _preferences;
+  static const allTimeMenuKey = "menuList";
+  static const mealKey = "meal";
+
+  static Future init() async => 
+      _preferences = await SharedPreferences.getInstance();
+
+  static Future setAllTimeMenusPerWeek(Map menuList) async 
+  {
+    final strAllTimeMenusPerWeek = json.encode(menuList);
+    await _preferences.setString(allTimeMenuKey, strAllTimeMenusPerWeek);
+  }
+
+  static Map getAllTimeMenusPerWeek()
+  {
+    final allTimeMenusPerWeek = _preferences.getString(allTimeMenuKey) ?? "";
+    if (allTimeMenusPerWeek != "") {
+      return json.decode(allTimeMenusPerWeek);
+    } else {
+      return {};
+    }
+  }
+
+  static Future addMeal(List<String> meals) async
+  {
+    await _preferences.setStringList(mealKey, meals);
+  }
+
+  static List<String>? getMenus()
+  {
+    return _preferences.getStringList(mealKey);
+  }
+}

@@ -59,6 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ShoppingListPreferences.init();
+  await MenuStoragePreferences.init();
 
   runApp(ShoppingListApp());
 }
