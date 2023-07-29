@@ -5,7 +5,7 @@ import 'package:test_app/globals.dart';
 class MenuViewLogic
 {
   late Map _allTimeMenus;
-  late List<String>? meals;
+  late Map? meals;
 
   MenuViewLogic(Map allTimeMenus)
   {
@@ -21,7 +21,7 @@ class MenuViewLogic
     }
     List menu = [];
     for (int i = 0; i < 7; i++) {
-      menu.add(meals![Random().nextInt(7)]);
+      menu.add(meals!.keys.toList()[Random().nextInt(meals!.length)]);
     }
     return menu;
   }

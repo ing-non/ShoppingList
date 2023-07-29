@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
+import 'logic/models/meal.dart';
+
 Color globalMainColor = Colors.purple;
 Color globalAccentColor = Colors.purpleAccent;
 
@@ -52,13 +54,32 @@ class MenuStoragePreferences {
     }
   }
 
-  static Future addMeal(List<String> meals) async
+  static Future addMeal(Meal meal) async
   {
-    await _preferences.setStringList(mealKey, meals);
+    _preferences.remove(allTimeMenuKey);
+    late Map jsonMeals;
+    var jsonMeal = meal.toJson();
+    var meals = _preferences.getString(mealKey) ?? "";
+    if (meals != "")
+    {
+      jsonMeals = json.decode(meals);
+    }
+    else 
+    {
+      jsonMeals = {};
+    }
+    jsonMeals[jsonMeal["name"]] = jsonMeal["ingredients"];
+    meals = json.encode(jsonMeals);
+    await _preferences.setString(mealKey, meals);
   }
 
-  static List<String>? getMeals()
+  static Map? getMeals()
   {
-    return _preferences.getStringList(mealKey);
+    var meals = _preferences.getString(mealKey) ?? "";
+    if (meals != "")
+    {
+      return json.decode(meals);
+    }
+    return {};
   }
 }

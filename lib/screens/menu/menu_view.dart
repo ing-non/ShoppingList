@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:test_app/globals.dart';
 import 'package:test_app/logic/menu_view_logic.dart';
 
+import '../../logic/models/meal.dart';
+
 String menuName = "Menu";
 
 class MenuHome extends StatefulWidget {
@@ -15,7 +17,7 @@ class MenuHome extends StatefulWidget {
 
 class _MenuHomeState extends State<MenuHome> {
   late PageController pageViewController;
-  late List<String>? meals;
+  late Map? meals;
   late Map allTimeMenus;
   final dtNextWeek = DateUtils.dateOnly(DateTime.now().add(Duration(days: 7)));
   late Color mainColor;
@@ -33,7 +35,9 @@ class _MenuHomeState extends State<MenuHome> {
   @override
   void initState() {
     super.initState();
+    MenuStoragePreferences.addMeal(Meal(name: "test2", ingredients: {"ing":"3g"}));
     meals = MenuStoragePreferences.getMeals();
+    print(meals!.keys);
     allTimeMenus = MenuStoragePreferences.getAllTimeMenusPerWeek();
     MenuViewLogic menuViewLogic = MenuViewLogic(allTimeMenus);
     pageViewController =
