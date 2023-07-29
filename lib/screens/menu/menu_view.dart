@@ -1,9 +1,8 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'dart:math';
 import 'package:test_app/globals.dart';
-import 'package:test_app/logic/createNewMenu.dart';
+import 'package:test_app/logic/menu_view_logic.dart';
 
 String menuName = "Menu";
 
@@ -16,10 +15,11 @@ class MenuHome extends StatefulWidget {
 
 class _MenuHomeState extends State<MenuHome> {
   late PageController pageViewController;
-  late Random random;
   late List<String>? meals;
   late Map allTimeMenus;
-  final dtNow = DateUtils.dateOnly(DateTime.now());
+  final dtNextWeek = DateUtils.dateOnly(DateTime.now().add(Duration(days: 7)));
+  late Color mainColor;
+  late Color accentColor;
   final List weekdays = [
     "Monday",
     "Tuesday",
@@ -33,38 +33,30 @@ class _MenuHomeState extends State<MenuHome> {
   @override
   void initState() {
     super.initState();
-    random = Random();
     meals = MenuStoragePreferences.getMeals();
     allTimeMenus = MenuStoragePreferences.getAllTimeMenusPerWeek();
+    MenuViewLogic menuViewLogic = MenuViewLogic(allTimeMenus);
     pageViewController =
-      PageController(initialPage: allTimeMenus.keys.toList().length);
+        PageController(initialPage: menuViewLogic.getIndexOfCurrentWeekFromAllTimeMenus());
 
-    CreateNewMenu createMenu = CreateNewMenu(allTimeMenus);
-    List weeklyMenu = createMenu.getWeeklyMenu(setStartDateToMonday(dtNow));
-    allTimeMenus[setStartDateToMonday(dtNow).toString()] = weeklyMenu;
-
-    MenuStoragePreferences.setAllTimeMenusPerWeek(allTimeMenus);
+    mainColor = globalMainColor;
+    accentColor = globalAccentColor;
   }
 
   @override
-    void dispose() {
+  void dispose() {
     pageViewController.dispose();
     super.dispose();
   }
 
-  DateTime setStartDateToMonday(DateTime startDate) {
-    while (true) 
-    {
-      if (startDate.weekday != 1) 
-      {
-        startDate = startDate.subtract(Duration(days: 1));
-      } 
-      else 
-      {
-        break;
-      }
-    }
-    return startDate;
+  void createMenu() {
+    MenuViewLogic menuViewLogic = MenuViewLogic(allTimeMenus);
+    List weeklyMenu =
+        menuViewLogic.getWeeklyMenu(menuViewLogic.setStartDateToMonday(dtNextWeek));
+    allTimeMenus[menuViewLogic.setStartDateToMonday(dtNextWeek).toString()] =
+        weeklyMenu;
+    //allTimeMenus.remove(createMenu.setStartDateToMonday(dtNextWeek).toString());
+    MenuStoragePreferences.setAllTimeMenusPerWeek(allTimeMenus);
   }
 
   @override
@@ -79,29 +71,64 @@ class _MenuHomeState extends State<MenuHome> {
         ),
         elevation: 0,
       ),
-      body: PageView(controller: pageViewController, children: [
-        for (final date in allTimeMenus.keys.toList())
-          ListView(children: [
-            SizedBox(
-              height: 20,
-            ),
-            Center(
-              child: Text(
-                "${DateTime.parse(date).day}.${DateTime.parse(date).month}.${DateTime.parse(date).year} - ${DateTime.parse(date).add(Duration(days: 6)).day}.${DateTime.parse(date).add(Duration(days: 6)).month}.${DateTime.parse(date).add(Duration(days: 6)).year}",
-                style: TextStyle(fontSize: 20),
+      body: ScrollConfiguration(
+        behavior: ScrollBehavior(),
+        child: GlowingOverscrollIndicator(
+          axisDirection: AxisDirection.right,
+          color: accentColor,
+          child: Column(
+            children: [
+              Expanded(
+                flex: 3,
+                child: PageView(controller: pageViewController, children: [
+                  for (final date in allTimeMenus.keys.toList())
+                    ListView(
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Center(
+                            child: Text(
+                              "${DateTime.parse(date).day}.${DateTime.parse(date).month}.${DateTime.parse(date).year} - ${DateTime.parse(date).add(Duration(days: 6)).day}.${DateTime.parse(date).add(Duration(days: 6)).month}.${DateTime.parse(date).add(Duration(days: 6)).year}",
+                              style: TextStyle(fontSize: 20),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 35,
+                          ),
+                          for (int i = 0; i < 7; i++)
+                            ListTile(
+                              leading: Text(
+                                  "${weekdays[i]}, ${DateTime.parse(date).add(Duration(days: i)).day}-${DateTime.parse(date).add(Duration(days: i)).month}-${DateTime.parse(date).add(Duration(days: i)).year}"),
+                              trailing: Text("${allTimeMenus[date][i]}"),
+                            )
+                        ]),
+                ]),
               ),
-            ),
-            SizedBox(
-              height: 35,
-            ),
-            for (int i = 0; i < 7; i++)
-              ListTile(
-                leading: Text(
-                    "${weekdays[i]}, ${DateTime.parse(date).add(Duration(days: i)).day}-${DateTime.parse(date).add(Duration(days: i)).month}-${DateTime.parse(date).add(Duration(days: i)).year}"),
-                trailing: Text("${allTimeMenus[date][i]}"),
+              Expanded(
+                flex: 1,
+                child: Column(
+                  children: [
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      style:
+                          ElevatedButton.styleFrom(backgroundColor: mainColor),
+                      child: Text("Create Menu for next Week"),
+                      onPressed: () {
+                        createMenu();
+                        setState(() {
+                          allTimeMenus = MenuStoragePreferences.getAllTimeMenusPerWeek();
+                        });
+                      },
+                    ),
+                  ],
+                ),
               )
-          ]),
-      ]),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

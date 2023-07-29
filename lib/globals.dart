@@ -1,5 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+
+Color globalMainColor = Colors.purple;
+Color globalAccentColor = Colors.purpleAccent;
 
 class ShoppingListPreferences {
   static late SharedPreferences _preferences;
