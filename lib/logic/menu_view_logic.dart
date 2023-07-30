@@ -26,22 +26,22 @@ class MenuViewLogic
     return menu;
   }
 
-  DateTime setStartDateToMonday(DateTime startDate) {
+  DateTime setDateToMonday(DateTime date) {
     while (true) {
-      if (startDate.weekday != 1) {
-        startDate = startDate.subtract(const Duration(days: 1));
+      if (date.weekday != 1) {
+        date = date.subtract(const Duration(days: 1));
       } else {
         break;
       }
     }
-    return startDate;
+    return date;
   }
 
   int getIndexOfCurrentWeekFromAllTimeMenus()
   {
     DateTime dtNow = DateUtils.dateOnly(DateTime.now());
     List allTimeMenusKeys = _allTimeMenus.keys.toList();
-    int indexOfDtNow = allTimeMenusKeys.indexOf(setStartDateToMonday(dtNow).toString());
+    int indexOfDtNow = allTimeMenusKeys.indexOf(setDateToMonday(dtNow).toString());
     if (indexOfDtNow >= 0)
     {
       return indexOfDtNow;
@@ -49,6 +49,27 @@ class MenuViewLogic
     else{
       return allTimeMenusKeys.length;
     }
+  }
+
+  void deleteMenu(double? page)
+  {
+    List allTimeMenusKeys = _allTimeMenus.keys.toList();
+    String toDelete = allTimeMenusKeys[page!.toInt()];
+    _allTimeMenus.remove(toDelete);
+    MenuStoragePreferences.setAllTimeMenusPerWeek(_allTimeMenus);
+  }
+
+  void createMenu()
+  {
+    final dtNextWeek =
+      DateUtils.dateOnly(DateTime.now().subtract(Duration(days: -8)));
+    MenuViewLogic menuViewLogic = MenuViewLogic(_allTimeMenus);
+    List weeklyMenu =
+        menuViewLogic.getWeeklyMenu(menuViewLogic.setDateToMonday(dtNextWeek));
+    _allTimeMenus[menuViewLogic.setDateToMonday(dtNextWeek).toString()] =
+        weeklyMenu;
+    //allTimeMenus.remove(createMenu.setStartDateToMonday(dtNextWeek).toString());
+    MenuStoragePreferences.setAllTimeMenusPerWeek(_allTimeMenus);
   }
 
 }

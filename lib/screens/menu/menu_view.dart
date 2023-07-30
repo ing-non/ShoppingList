@@ -1,5 +1,4 @@
 // ignore_for_file: prefer_const_constructors
-
 import 'package:flutter/material.dart';
 import 'package:test_app/globals.dart';
 import 'package:test_app/logic/menu_view_logic.dart';
@@ -17,9 +16,10 @@ class MenuHome extends StatefulWidget {
 
 class _MenuHomeState extends State<MenuHome> {
   late PageController pageViewController;
+  late MenuViewLogic menuViewLogic;
   late Map? meals;
   late Map allTimeMenus;
-  final dtNextWeek = DateUtils.dateOnly(DateTime.now().add(Duration(days: 7)));
+  final dtNow = DateUtils.dateOnly(DateTime.now());
   late Color mainColor;
   late Color accentColor;
   final List weekdays = [
@@ -35,13 +35,15 @@ class _MenuHomeState extends State<MenuHome> {
   @override
   void initState() {
     super.initState();
-    MenuStoragePreferences.addMeal(Meal(name: "test2", ingredients: {"ing":"3g"}));
     meals = MenuStoragePreferences.getMeals();
-    print(meals!.keys);
     allTimeMenus = MenuStoragePreferences.getAllTimeMenusPerWeek();
-    MenuViewLogic menuViewLogic = MenuViewLogic(allTimeMenus);
-    pageViewController =
-        PageController(initialPage: menuViewLogic.getIndexOfCurrentWeekFromAllTimeMenus());
+    
+    menuViewLogic = MenuViewLogic(allTimeMenus);
+    pageViewController = PageController(
+        initialPage: menuViewLogic.getIndexOfCurrentWeekFromAllTimeMenus());
+    MenuStoragePreferences.addMeal(
+        Meal(name: "test2", ingredients: {"ing": "3g"}));
+
 
     mainColor = globalMainColor;
     accentColor = globalAccentColor;
@@ -51,16 +53,6 @@ class _MenuHomeState extends State<MenuHome> {
   void dispose() {
     pageViewController.dispose();
     super.dispose();
-  }
-
-  void createMenu() {
-    MenuViewLogic menuViewLogic = MenuViewLogic(allTimeMenus);
-    List weeklyMenu =
-        menuViewLogic.getWeeklyMenu(menuViewLogic.setStartDateToMonday(dtNextWeek));
-    allTimeMenus[menuViewLogic.setStartDateToMonday(dtNextWeek).toString()] =
-        weeklyMenu;
-    //allTimeMenus.remove(createMenu.setStartDateToMonday(dtNextWeek).toString());
-    MenuStoragePreferences.setAllTimeMenusPerWeek(allTimeMenus);
   }
 
   @override
@@ -75,15 +67,15 @@ class _MenuHomeState extends State<MenuHome> {
         ),
         elevation: 0,
       ),
-      body: ScrollConfiguration(
-        behavior: ScrollBehavior(),
-        child: GlowingOverscrollIndicator(
-          axisDirection: AxisDirection.right,
-          color: accentColor,
-          child: Column(
-            children: [
-              Expanded(
-                flex: 3,
+      body: Column(
+        children: [
+          Expanded(
+            flex: 3,
+            child: ScrollConfiguration(
+              behavior: ScrollBehavior(),
+              child: GlowingOverscrollIndicator(
+                axisDirection: AxisDirection.right,
+                color: accentColor,
                 child: PageView(controller: pageViewController, children: [
                   for (final date in allTimeMenus.keys.toList())
                     ListView(
@@ -92,11 +84,29 @@ class _MenuHomeState extends State<MenuHome> {
                           SizedBox(
                             height: 20,
                           ),
-                          Center(
-                            child: Text(
-                              "${DateTime.parse(date).day}.${DateTime.parse(date).month}.${DateTime.parse(date).year} - ${DateTime.parse(date).add(Duration(days: 6)).day}.${DateTime.parse(date).add(Duration(days: 6)).month}.${DateTime.parse(date).add(Duration(days: 6)).year}",
-                              style: TextStyle(fontSize: 20),
-                            ),
+                          Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Text(
+                                "${DateTime.parse(date).day}.${DateTime.parse(date).month}.${DateTime.parse(date).year} - ${DateTime.parse(date).add(Duration(days: 6)).day}.${DateTime.parse(date).add(Duration(days: 6)).month}.${DateTime.parse(date).add(Duration(days: 6)).year}",
+                                style: TextStyle(fontSize: 20),
+                              ),
+                              if (dtNow.compareTo(DateTime.parse(date)) <
+                                  0) ...[
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 10),
+                                    child: GestureDetector(
+                                        onTap: () {
+                                          menuViewLogic.deleteMenu(pageViewController.page);
+                                          setState(() {});
+                                        },
+                                        child: Icon(Icons.delete)),
+                                  ),
+                                )
+                              ]
+                            ],
                           ),
                           SizedBox(
                             height: 35,
@@ -110,28 +120,25 @@ class _MenuHomeState extends State<MenuHome> {
                         ]),
                 ]),
               ),
-              Expanded(
-                flex: 1,
-                child: Column(
-                  children: [
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      style:
-                          ElevatedButton.styleFrom(backgroundColor: mainColor),
-                      child: Text("Create Menu for next Week"),
-                      onPressed: () {
-                        createMenu();
-                        setState(() {
-                          allTimeMenus = MenuStoragePreferences.getAllTimeMenusPerWeek();
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              )
-            ],
+            ),
           ),
-        ),
+          Expanded(
+            flex: 1,
+            child: Column(
+              children: [
+                SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: mainColor),
+                  child: Text("Create Menu for next Week"),
+                  onPressed: () {
+                    menuViewLogic.createMenu();
+                    setState(() {});
+                  },
+                ),
+              ],
+            ),
+          )
+        ],
       ),
     );
   }

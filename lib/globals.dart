@@ -56,7 +56,7 @@ class MenuStoragePreferences {
 
   static Future addMeal(Meal meal) async
   {
-    _preferences.remove(allTimeMenuKey);
+    //_preferences.remove(allTimeMenuKey);
     late Map jsonMeals;
     var jsonMeal = meal.toJson();
     var meals = _preferences.getString(mealKey) ?? "";
