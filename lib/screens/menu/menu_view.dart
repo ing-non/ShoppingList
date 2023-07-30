@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:test_app/globals.dart';
 import 'package:test_app/logic/menu_view_logic.dart';
-
 import '../../logic/models/meal.dart';
 
 String menuName = "Menu";
@@ -37,13 +36,12 @@ class _MenuHomeState extends State<MenuHome> {
     super.initState();
     meals = MenuStoragePreferences.getMeals();
     allTimeMenus = MenuStoragePreferences.getAllTimeMenusPerWeek();
-    
+
     menuViewLogic = MenuViewLogic(allTimeMenus);
     pageViewController = PageController(
         initialPage: menuViewLogic.getIndexOfCurrentWeekFromAllTimeMenus());
     MenuStoragePreferences.addMeal(
         Meal(name: "test2", ingredients: {"ing": "3g"}));
-
 
     mainColor = globalMainColor;
     accentColor = globalAccentColor;
@@ -99,7 +97,8 @@ class _MenuHomeState extends State<MenuHome> {
                                     padding: const EdgeInsets.only(right: 10),
                                     child: GestureDetector(
                                         onTap: () {
-                                          menuViewLogic.deleteMenu(pageViewController.page);
+                                          menuViewLogic.deleteMenu(
+                                              pageViewController.page);
                                           setState(() {});
                                         },
                                         child: Icon(Icons.delete)),

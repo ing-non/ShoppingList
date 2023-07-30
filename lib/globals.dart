@@ -35,17 +35,15 @@ class MenuStoragePreferences {
   static const allTimeMenuKey = "menuList";
   static const mealKey = "meal";
 
-  static Future init() async => 
+  static Future init() async =>
       _preferences = await SharedPreferences.getInstance();
 
-  static Future setAllTimeMenusPerWeek(Map menuList) async 
-  {
+  static Future setAllTimeMenusPerWeek(Map menuList) async {
     final strAllTimeMenusPerWeek = json.encode(menuList);
     await _preferences.setString(allTimeMenuKey, strAllTimeMenusPerWeek);
   }
 
-  static Map getAllTimeMenusPerWeek()
-  {
+  static Map getAllTimeMenusPerWeek() {
     final allTimeMenusPerWeek = _preferences.getString(allTimeMenuKey) ?? "";
     if (allTimeMenusPerWeek != "") {
       return json.decode(allTimeMenusPerWeek);
@@ -54,18 +52,14 @@ class MenuStoragePreferences {
     }
   }
 
-  static Future addMeal(Meal meal) async
-  {
+  static Future addMeal(Meal meal) async {
     //_preferences.remove(allTimeMenuKey);
     late Map jsonMeals;
     var jsonMeal = meal.toJson();
     var meals = _preferences.getString(mealKey) ?? "";
-    if (meals != "")
-    {
+    if (meals != "") {
       jsonMeals = json.decode(meals);
-    }
-    else 
-    {
+    } else {
       jsonMeals = {};
     }
     jsonMeals[jsonMeal["name"]] = jsonMeal["ingredients"];
@@ -73,11 +67,9 @@ class MenuStoragePreferences {
     await _preferences.setString(mealKey, meals);
   }
 
-  static Map? getMeals()
-  {
+  static Map? getMeals() {
     var meals = _preferences.getString(mealKey) ?? "";
-    if (meals != "")
-    {
+    if (meals != "") {
       return json.decode(meals);
     }
     return {};
