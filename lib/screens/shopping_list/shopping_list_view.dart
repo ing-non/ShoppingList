@@ -94,78 +94,76 @@ class ShoppingListViewState extends State<ShoppingListView> {
                   return GestureDetector(
                       key: Key('$index'),
                       child: Container(
-                        padding: EdgeInsets.only(bottom: 5, top: 5),
-                        decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 245, 245, 245),
-                        ),
-                        child: Theme(
-                          data: ThemeData(
-                              unselectedWidgetColor: Colors.purpleAccent),
-                          child: CheckboxListTile(
-                            contentPadding:
-                                EdgeInsets.only(left: 30, right: 20),
-                            activeColor: Colors.purpleAccent,
-                            title: Text(
-                              "${index + 1} ${shoppingList.keys.toList()[index]}",
-                              style: TextStyle(
-                                  fontWeight: shoppingListItems[index][1]
-                                      ? FontWeight.normal
-                                      : FontWeight.bold,
-                                  decoration: shoppingListItems[index][1]
-                                      ? TextDecoration.lineThrough
-                                      : null,
-                                  decorationThickness: 4),
-                            ),
-                            subtitle: Text("${shoppingListItems[index][0]}",
-                                style: TextStyle(
-                                    decoration: shoppingListItems[index][1]
-                                        ? TextDecoration.lineThrough
-                                        : null,
-                                    decorationThickness: 4)),
-                            value: shoppingListItems[index][1],
-                            onChanged: (bool? newValue) {
-                              setState(() {
-                                shoppingListItems[index][1] = newValue;
-                                shoppingList.values.toList()[index][1] =
-                                    newValue;
-                                shoppingLists[widget.title] = shoppingList;
-                                ShoppingListPreferences.setShoppingLists(
-                                    shoppingLists);
-                              });
-                            },
-                            secondary: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                ReorderableDragStartListener(
-                                  index: index,
-                                  child: Icon(Icons.drag_handle),
-                                ),
-                                GestureDetector(
-                                    child: Icon(Icons.edit),
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                EditShoppingListItem(
-                                                    shoppingList.keys
-                                                        .toList()[index]
-                                                        .toString(),
-                                                    shoppingList.values
-                                                        .toList()[index][0],
-                                                    widget.title,
-                                                    index)),
-                                      ).then(
-                                        (value) {
-                                          refresh();
-                                        },
-                                      );
-                                    })
-                              ],
-                            ),
+                          padding: EdgeInsets.only(bottom: 5, top: 5),
+                          decoration: BoxDecoration(
+                            color: Color.fromARGB(255, 245, 245, 245),
                           ),
-                        ),
-                      ),
+                          child: Theme(
+                              data: ThemeData(
+                                  unselectedWidgetColor: Colors.purpleAccent),
+                              child: CheckboxListTile(
+                                  contentPadding:
+                                      EdgeInsets.only(left: 30, right: 20),
+                                  activeColor: Colors.purpleAccent,
+                                  title: Text(
+                                    "${index + 1} ${shoppingList.keys.toList()[index]}",
+                                    style: TextStyle(
+                                        fontWeight: shoppingListItems[index][1]
+                                            ? FontWeight.normal
+                                            : FontWeight.bold,
+                                        decoration: shoppingListItems[index][1]
+                                            ? TextDecoration.lineThrough
+                                            : null,
+                                        decorationThickness: 4),
+                                  ),
+                                  subtitle: Text(
+                                      "${shoppingListItems[index][0]}",
+                                      style: TextStyle(
+                                          decoration: shoppingListItems[index]
+                                                  [1]
+                                              ? TextDecoration.lineThrough
+                                              : null,
+                                          decorationThickness: 4)),
+                                  value: shoppingListItems[index][1],
+                                  onChanged: (bool? newValue) {
+                                    setState(() {
+                                      shoppingListItems[index][1] = newValue;
+                                      shoppingList.values.toList()[index][1] =
+                                          newValue;
+                                      shoppingLists[widget.title] =
+                                          shoppingList;
+                                      ShoppingListPreferences.setShoppingLists(
+                                          shoppingLists);
+                                    });
+                                  },
+                                  secondary: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        ReorderableDragStartListener(
+                                          index: index,
+                                          child: Icon(Icons.drag_handle),
+                                        ),
+                                        GestureDetector(
+                                            child: Icon(Icons.edit),
+                                            onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        EditShoppingListItem(
+                                                            shoppingList.keys
+                                                                .toList()[index]
+                                                                .toString(),
+                                                            shoppingList.values
+                                                                    .toList()[
+                                                                index][0],
+                                                            widget.title,
+                                                            index)),
+                                              ).then((value) {
+                                                refresh();
+                                              });
+                                            })
+                                      ])))),
                       onLongPress: () {
                         showDialog(
                             context: context,
