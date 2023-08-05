@@ -16,7 +16,7 @@ class MenuHome extends StatefulWidget {
 class _MenuHomeState extends State<MenuHome> {
   late PageController pageViewController;
   late MenuViewLogic menuViewLogic;
-  late Map? meals;
+  late Map meals;
   late Map allTimeMenus;
   final dtNow = DateUtils.dateOnly(DateTime.now());
   late Color mainColor;
@@ -36,13 +36,9 @@ class _MenuHomeState extends State<MenuHome> {
     super.initState();
     meals = MenuStoragePreferences.getMeals();
     allTimeMenus = MenuStoragePreferences.getAllTimeMenusPerWeek();
-
-    menuViewLogic = MenuViewLogic(allTimeMenus);
+    menuViewLogic = MenuViewLogic();
     pageViewController = PageController(
         initialPage: menuViewLogic.getIndexOfCurrentWeekFromAllTimeMenus());
-    MenuStoragePreferences.addMeal(
-        Meal(name: "test2", ingredients: {"ing": "3g"}));
-
     mainColor = globalMainColor;
     accentColor = globalAccentColor;
   }
@@ -99,7 +95,11 @@ class _MenuHomeState extends State<MenuHome> {
                                         onTap: () {
                                           menuViewLogic.deleteMenu(
                                               pageViewController.page);
-                                          setState(() {});
+                                          setState(() {
+                                            allTimeMenus =
+                                                MenuStoragePreferences
+                                                    .getAllTimeMenusPerWeek();
+                                          });
                                         },
                                         child: Icon(Icons.delete)),
                                   ),
@@ -131,7 +131,10 @@ class _MenuHomeState extends State<MenuHome> {
                   child: Text("Create Menu for next Week"),
                   onPressed: () {
                     menuViewLogic.createMenu();
-                    setState(() {});
+                    setState(() {
+                      allTimeMenus =
+                          MenuStoragePreferences.getAllTimeMenusPerWeek();
+                    });
                   },
                 ),
               ],

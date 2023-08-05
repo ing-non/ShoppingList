@@ -1,3 +1,8 @@
 {
-    "cmake.sourceDirectory": "${workspaceFolder}/windows/flutter"
+    "cmake.sourceDirectory": "${workspaceFolder}/windows/flutter",
+    "files.associations": {
+        "*.cpp": "cpp",
+        "*.py": "python",
+        "add_meal_list_logic": "cpp"
+    }
 }

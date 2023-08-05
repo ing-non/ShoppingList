@@ -52,22 +52,17 @@ class MenuStoragePreferences {
     }
   }
 
-  static Future addMeal(Meal meal) async {
-    //_preferences.remove(allTimeMenuKey);
-    late Map jsonMeals;
-    var jsonMeal = meal.toJson();
-    var meals = _preferences.getString(mealKey) ?? "";
-    if (meals != "") {
-      jsonMeals = json.decode(meals);
-    } else {
-      jsonMeals = {};
-    }
-    jsonMeals[jsonMeal["name"]] = jsonMeal["ingredients"];
-    meals = json.encode(jsonMeals);
-    await _preferences.setString(mealKey, meals);
+  static Future setMeals(Map meals) async {
+    final strMeals = json.encode(meals);
+    await _preferences.setString(mealKey, strMeals);
   }
 
-  static Map? getMeals() {
+  static Future addMeal(Map meals) async {
+    final strMeals = json.encode(meals);
+    await _preferences.setString(mealKey, strMeals);
+  }
+
+  static Map getMeals() {
     var meals = _preferences.getString(mealKey) ?? "";
     if (meals != "") {
       return json.decode(meals);

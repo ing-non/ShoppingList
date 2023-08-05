@@ -3,23 +3,26 @@ import 'package:flutter/material.dart';
 import 'package:test_app/globals.dart';
 
 class MenuViewLogic {
-  late Map _allTimeMenus;
-  late Map? meals;
+  late Map allTimeMenus;
+  late Map meals;
 
-  MenuViewLogic(Map allTimeMenus) {
-    _allTimeMenus = allTimeMenus;
+  MenuViewLogic() {
+    allTimeMenus = MenuStoragePreferences.getAllTimeMenusPerWeek();
     meals = MenuStoragePreferences.getMeals();
   }
 
   List getWeeklyMenu(DateTime startDate) {
-    if (_allTimeMenus.containsKey(startDate.toString())) {
-      return _allTimeMenus[startDate.toString()];
+    if (allTimeMenus.containsKey(startDate.toString())) {
+      return allTimeMenus[startDate.toString()];
     }
     List menu = [];
-    for (int i = 0; i < 7; i++) {
-      menu.add(meals!.keys.toList()[Random().nextInt(meals!.length)]);
+    if (meals.length > 0) {
+      for (int i = 0; i < 7; i++) {
+        menu.add(meals.keys.toList()[Random().nextInt(meals.length)]);
+      }
+      return menu;
     }
-    return menu;
+    return ["", "", "", "", "", "", ""];
   }
 
   DateTime setDateToMonday(DateTime date) {
@@ -35,7 +38,7 @@ class MenuViewLogic {
 
   int getIndexOfCurrentWeekFromAllTimeMenus() {
     DateTime dtNow = DateUtils.dateOnly(DateTime.now());
-    List allTimeMenusKeys = _allTimeMenus.keys.toList();
+    List allTimeMenusKeys = allTimeMenus.keys.toList();
     int indexOfDtNow =
         allTimeMenusKeys.indexOf(setDateToMonday(dtNow).toString());
     if (indexOfDtNow >= 0) {
@@ -46,21 +49,18 @@ class MenuViewLogic {
   }
 
   void deleteMenu(double? page) {
-    List allTimeMenusKeys = _allTimeMenus.keys.toList();
+    List allTimeMenusKeys = allTimeMenus.keys.toList();
     String toDelete = allTimeMenusKeys[page!.toInt()];
-    _allTimeMenus.remove(toDelete);
-    MenuStoragePreferences.setAllTimeMenusPerWeek(_allTimeMenus);
+    allTimeMenus.remove(toDelete);
+    MenuStoragePreferences.setAllTimeMenusPerWeek(allTimeMenus);
   }
 
   void createMenu() {
     final dtNextWeek =
-        DateUtils.dateOnly(DateTime.now().subtract(Duration(days: -8)));
-    MenuViewLogic menuViewLogic = MenuViewLogic(_allTimeMenus);
-    List weeklyMenu =
-        menuViewLogic.getWeeklyMenu(menuViewLogic.setDateToMonday(dtNextWeek));
-    _allTimeMenus[menuViewLogic.setDateToMonday(dtNextWeek).toString()] =
-        weeklyMenu;
+        DateUtils.dateOnly(DateTime.now().add(Duration(days: 7)));
+    List weeklyMenu = getWeeklyMenu(setDateToMonday(dtNextWeek));
+    allTimeMenus[setDateToMonday(dtNextWeek).toString()] = weeklyMenu;
     //allTimeMenus.remove(createMenu.setStartDateToMonday(dtNextWeek).toString());
-    MenuStoragePreferences.setAllTimeMenusPerWeek(_allTimeMenus);
+    MenuStoragePreferences.setAllTimeMenusPerWeek(allTimeMenus);
   }
 }
