@@ -1,28 +1,27 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:test_app/globals.dart';
 import 'package:test_app/logic/meal_list_logic.dart';
 import 'package:test_app/logic/models/meal.dart';
 
-class AddMeal extends StatefulWidget {
-  const AddMeal({super.key});
+class AddMealView extends StatefulWidget {
+  const AddMealView({super.key});
 
   @override
-  State<AddMeal> createState() => _AddMealState();
+  State<AddMealView> createState() => _AddMealViewState();
 }
 
-class _AddMealState extends State<AddMeal> {
+class _AddMealViewState extends State<AddMealView> {
   final nameController = TextEditingController();
   late MealListLogic mealListLogic;
   int ingredientIndex = 0;
-  Map<String, Container> ingredientInputs = {};
+  Map<String, Container> ingredientControllers = {};
 
   @override
   void initState() {
     super.initState();
     mealListLogic = MealListLogic();
-    ingredientInputs[ingredientIndex.toString()] =
+    ingredientControllers[ingredientIndex.toString()] =
         (addIngredient(ingredientIndex));
   }
 
@@ -56,7 +55,7 @@ class _AddMealState extends State<AddMeal> {
               child: Icon(Icons.close),
               onTap: () {
                 setState(() {
-                  ingredientInputs.remove(index.toString());
+                  ingredientControllers.remove(index.toString());
                 });
               },
             )
@@ -119,9 +118,9 @@ class _AddMealState extends State<AddMeal> {
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 30),
                     child: ListView.builder(
-                        itemCount: ingredientInputs.length,
+                        itemCount: ingredientControllers.length,
                         itemBuilder: (BuildContext context, int index) {
-                          return ingredientInputs.values.toList()[index];
+                          return ingredientControllers.values.toList()[index];
                         }),
                   ),
                 ),
@@ -132,7 +131,7 @@ class _AddMealState extends State<AddMeal> {
                         onPressed: () {
                           ingredientIndex += 1;
                           setState(() =>
-                              ingredientInputs[ingredientIndex.toString()] =
+                              ingredientControllers[ingredientIndex.toString()] =
                                   (addIngredient(ingredientIndex)));
                         })),
               ],

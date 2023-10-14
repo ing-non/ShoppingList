@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:test_app/screens/shopping_list/shopping_lists_view.dart';
 import 'screens/menu/menu_view.dart';
-import 'screens/meal_list.dart/meal_list_view.dart';
+import 'screens/meal_list/meal_list_view.dart';
 import 'globals.dart';
 
 class ShoppingListApp extends StatelessWidget {

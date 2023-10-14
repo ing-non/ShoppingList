@@ -3,7 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:test_app/globals.dart';
 import 'package:test_app/main.dart';
-import 'add_meal.dart';
+import 'add_meal_view.dart';
+import 'edit_meal_view.dart';
 import '../../logic/meal_list_logic.dart';
 
 String mealListName = "Meal list";
@@ -52,11 +53,13 @@ class _CalenderHomeState extends State<CalenderHome> {
                       borderRadius: BorderRadius.circular(addMealSize / 2),
                       onTap: () {
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => AddMeal())).then((value) {
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => AddMealView()))
+                            .then((value) {
                           setState(() {
                             meals = MenuStoragePreferences.getMeals();
+                            print(meals);
                           });
                         });
                       },
@@ -75,21 +78,28 @@ class _CalenderHomeState extends State<CalenderHome> {
               child: ListView.builder(
             itemCount: meals.keys.toList().length,
             itemBuilder: (BuildContext context, int index) {
-              return Container(
-                padding: EdgeInsets.only(bottom: 5, top: 5),
-                child: ListTile(
-                  key: Key('$index'),
-                  title: Text("${meals.keys.toList()[index]}"),
-                  trailing: GestureDetector(
-                    child: Icon(Icons.delete),
-                    onTap: () {
-                      mealListLogic.delete(meals.keys.toList()[index]);
-                      setState(() {
-                        meals = MenuStoragePreferences.getMeals();
-                      });
-                    },
-                  ),
-                ),
+              return GestureDetector(
+                child: Container(
+                    padding: EdgeInsets.only(bottom: 5, top: 5),
+                    child: ListTile(
+                        key: Key('$index'),
+                        title: Text("${meals.keys.toList()[index]}"),
+                        trailing: GestureDetector(
+                          child: Icon(Icons.delete),
+                          onTap: () {
+                            MealListLogic().delete(meals.keys.toList()[index]);
+                            setState(() {
+                              meals = MenuStoragePreferences.getMeals();
+                            });
+                          },
+                        ))),
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              EditMealView("${meals.keys.toList()[index]}")));
+                },
               );
             },
           )),

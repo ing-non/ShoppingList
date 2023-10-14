@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
-import 'logic/models/meal.dart';
-
 Color globalMainColor = Colors.purple;
 Color globalAccentColor = Colors.purpleAccent;
 
@@ -57,8 +55,8 @@ class MenuStoragePreferences {
     await _preferences.setString(mealKey, strMeals);
   }
 
-  static Future addMeal(Map meals) async {
-    final strMeals = json.encode(meals);
+  static Future addMeal(Map meal) async {
+    final strMeals = json.encode(meal);
     await _preferences.setString(mealKey, strMeals);
   }
 

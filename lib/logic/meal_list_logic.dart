@@ -17,7 +17,8 @@ class MealListLogic {
 
   void addMeal(Meal meal) {
     meals[meal.name] = meal.ingredients;
-    MenuStoragePreferences.addMeal(meals);
+    print(meals);
+    MenuStoragePreferences.setMeals(meals);
   }
 
   void delete(String mealName)
