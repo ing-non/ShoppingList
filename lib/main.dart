@@ -1,10 +1,13 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:test_app/screens/shopping_list/shopping_lists_view.dart';
 import 'screens/menu/menu_view.dart';
 import 'screens/meal_list/meal_list_view.dart';
 import 'globals.dart';
+import 'firebase_options.dart';
 
 class ShoppingListApp extends StatelessWidget {
   const ShoppingListApp({super.key});
@@ -58,7 +61,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await ShoppingListPreferences.init();
+
+  await Firebase.initializeApp(
+  options: DefaultFirebaseOptions.currentPlatform,
+);
   await MenuStoragePreferences.init();
 
   runApp(ShoppingListApp());

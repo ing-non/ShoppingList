@@ -1,8 +1,11 @@
 // ignore_for_file: prefer_const_constructors, must_be_immutable
 
-import 'package:test_app/globals.dart';
+import 'dart:math';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:reorderable_grid_view/reorderable_grid_view.dart';
+import 'package:test_app/services/shoppingListRepository.dart';
 import 'add_list.dart';
 import 'shopping_list_view.dart';
 import 'edit_list.dart';
@@ -18,25 +21,8 @@ class ShoppingListHome extends StatefulWidget {
 
 class _ShoppingListHomeState extends State<ShoppingListHome> {
   static double addListSize = 56;
-  Map shoppingLists = {};
-
-  @override
-  void initState() {
-    super.initState();
-    shoppingLists = ShoppingListPreferences.getShoppingLists();
-  }
-
-  void _deleteList(String key) {
-    shoppingLists = ShoppingListPreferences.getShoppingLists();
-    shoppingLists.remove(key);
-    ShoppingListPreferences.setShoppingLists(shoppingLists);
-  }
-
-  void refresh() {
-    setState(() {
-      shoppingLists = ShoppingListPreferences.getShoppingLists();
-    });
-  }
+  Map<String, dynamic> shoppingLists = {};
+  ShoppingListRepository shoppingListRepository = ShoppingListRepository();
 
   @override
   Widget build(BuildContext context) {
@@ -61,11 +47,11 @@ class _ShoppingListHomeState extends State<ShoppingListHome> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => AddShoppingList(refresh)),
+                              builder: (context) => AddShoppingList()),
                         ).then((value) {
                           setState(() {
-                            shoppingLists =
-                                ShoppingListPreferences.getShoppingLists();
+                            //shoppingLists =
+                            //  shoppingListRepository.getShoppingLists();
                           });
                         });
                       },
@@ -75,79 +61,81 @@ class _ShoppingListHomeState extends State<ShoppingListHome> {
                       ),
                     )))
           ]),
-      body: ScrollConfiguration(
-        behavior: ScrollBehavior(),
-        child: GlowingOverscrollIndicator(
-          axisDirection: AxisDirection.down,
-          color: Colors.purpleAccent,
-          child: ReorderableGridView.count(
-              physics: ScrollPhysics(),
-              crossAxisCount: 2,
-              padding: EdgeInsets.all(20),
-              crossAxisSpacing: 20,
-              mainAxisSpacing: 20,
-              childAspectRatio: (150 / 200),
-              children: [
-                for (final listTitle in shoppingLists.keys)
-                  HomeScreenCard(
-                    listTitle,
-                    key: ValueKey(listTitle),
-                    deleteList: _deleteList,
-                    notifyParent: refresh,
-                  ),
-              ],
-              onReorder: (int oldIndex, int newIndex) {
-                setState(() {
-                  if (oldIndex < newIndex) {
-                    newIndex -= 1;
-                  }
-                  Map newShoppingLists = {};
-                  List itemKeys = shoppingLists.keys.toList();
-                  final String item = itemKeys.removeAt(oldIndex);
-                  itemKeys.insert(newIndex, item);
+      body: StreamBuilder<QuerySnapshot>(
+          stream: shoppingListRepository.getShoppingLists(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              List shoppingListsList = snapshot.data!.docs;
 
-                  for (final index in itemKeys) {
-                    newShoppingLists[index] = shoppingLists[index]!;
-                  }
-                  shoppingLists = newShoppingLists;
-                  ShoppingListPreferences.setShoppingLists(shoppingLists);
-                });
-              }),
-        ),
-      ),
+              return ScrollConfiguration(
+                behavior: ScrollBehavior(),
+                child: GlowingOverscrollIndicator(
+                  axisDirection: AxisDirection.down,
+                  color: Colors.purpleAccent,
+                  child: ReorderableGridView.builder(
+                      itemCount: shoppingListsList.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 20,
+                          mainAxisSpacing: 20,
+                          childAspectRatio: (150 / 200)),
+                      physics: ScrollPhysics(),
+                      padding: EdgeInsets.all(20),
+                      itemBuilder: (context, index) {
+                        // get each individual doc
+                        DocumentSnapshot document = shoppingListsList[index];
+                        String listDocID = document.id;
+                        // get note from each doc
+                        Map<String, dynamic> data =
+                            document.data() as Map<String, dynamic>;
+                        String shoppingListText = data["name"];
+
+                        // display as a grid tile
+                        return HomeScreenCard(listDocID, shoppingListText,
+                            key: ValueKey(shoppingListText));
+                      },
+                      onReorder: (int oldIndex, int newIndex) {
+                        if (oldIndex < newIndex) {
+                          newIndex -= 1;
+                        }
+                        final shoppingList =
+                            shoppingListsList.removeAt(oldIndex);
+                        shoppingListsList.insert(newIndex, shoppingList);
+
+                        WriteBatch batch = shoppingListRepository.getBatch();
+                        for (int i = 0; i < shoppingListsList.length; i++) {
+                          batch.update(
+                              shoppingListsList[i].reference, {'order': i});
+                        }
+                        batch.commit();
+                      }),
+                ),
+              );
+            } else {
+              return Scaffold();
+            }
+          }),
     );
   }
 }
 
 class HomeScreenCard extends StatefulWidget {
+  String listDocID;
   String title;
-  final Function deleteList;
-  final Function notifyParent;
 
-  HomeScreenCard(this.title,
-      {super.key, required this.deleteList, required this.notifyParent});
+  HomeScreenCard(
+    this.listDocID,
+    this.title, {
+    super.key,
+  });
 
   @override
   State<HomeScreenCard> createState() => _HomeScreenCardState();
 }
 
 class _HomeScreenCardState extends State<HomeScreenCard> {
-  Map shoppingLists = {};
-  Map shoppingList = {};
-  final double subTextSize = 15;
-  @override
-  void initState() {
-    super.initState();
-    shoppingLists = ShoppingListPreferences.getShoppingLists();
-    shoppingList = shoppingLists[widget.title];
-  }
-
-  void refresh() {
-    setState(() {
-      shoppingLists = ShoppingListPreferences.getShoppingLists();
-      shoppingList = shoppingLists[widget.title];
-    });
-  }
+  final double subTextSize = 16;
+  ShoppingListRepository shoppingListRepository = ShoppingListRepository();
 
   @override
   Widget build(BuildContext context) {
@@ -177,36 +165,35 @@ class _HomeScreenCardState extends State<HomeScreenCard> {
             SizedBox(
               height: 10,
             ),
-            if (shoppingList.values.toList().length > 5) ...[
-              Align(
-                  alignment: Alignment.centerLeft,
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        for (int i = 0; i < 5; i++) ...[
-                          Text(
-                            "${shoppingList.keys.toList()[i].toString()} : ${shoppingList.values.toList()[i][0].toString()}",
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                  stream: shoppingListRepository
+                      .getShoppingListById(widget.listDocID),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      List shoppingListItemsList = snapshot.data!.docs;
+                      final itemCount = min(shoppingListItemsList.length, 5);
+                      return ListView.builder(
+                        itemCount: itemCount,
+                        itemBuilder: (BuildContext context, int index) {
+                          DocumentSnapshot document =
+                              shoppingListItemsList[index];
+                          String itemDocID = document.id;
+                          // get note from each doc
+                          Map<String, dynamic> data =
+                              document.data() as Map<String, dynamic>;
+                          String shoppingListItemText = data["name"];
+                          return Text(
+                            "$shoppingListItemText : ${data["amount"]}",
                             style: TextStyle(fontSize: subTextSize),
-                          ),
-                        ],
-                        Text("...")
-                      ]))
-            ] else ...[
-              for (int i = 0; i < shoppingList.values.toList().length; i++) ...[
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Column(
-                    children: [
-                      Text(
-                        "${shoppingList.keys.toList()[i].toString()} : ${shoppingList.values.toList()[i][0].toString()}",
-                        style: TextStyle(fontSize: subTextSize),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ],
-            Spacer(flex: 1),
+                          );
+                        },
+                      );
+                    } else {
+                      return Container();
+                    }
+                  }),
+            ),
             Row(
               children: [
                 GestureDetector(
@@ -215,14 +202,8 @@ class _HomeScreenCardState extends State<HomeScreenCard> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) =>
-                                EditShoppingList(onTitleChanged: (newTitle) {
-                                  setState(() {
-                                    widget.title = newTitle;
-                                  });
-                                }, widget.title))).then((value) {
-                      widget.notifyParent;
-                    });
+                            builder: (context) => EditShoppingList(
+                                widget.listDocID, widget.title)));
                   },
                 ),
                 Spacer(flex: 1),
@@ -251,10 +232,8 @@ class _HomeScreenCardState extends State<HomeScreenCard> {
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.red),
                                 onPressed: () async {
-                                  widget.deleteList(widget.title);
-                                  setState(() {
-                                    widget.notifyParent();
-                                  });
+                                  shoppingListRepository
+                                      .deleteShoppingList(widget.listDocID);
                                   Navigator.pop(context);
                                 },
                                 child: Text("Delete")),
@@ -272,9 +251,10 @@ class _HomeScreenCardState extends State<HomeScreenCard> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ShoppingListView(widget.title),
+              builder: (context) =>
+                  ShoppingListView(widget.listDocID, widget.title),
             ),
-          ).then((value) => refresh());
+          );
         });
   }
 }

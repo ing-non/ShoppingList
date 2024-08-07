@@ -2,15 +2,16 @@
 
 import 'package:flutter/material.dart';
 import 'package:test_app/globals.dart';
+import 'package:test_app/services/shoppingListRepository.dart';
 
 class EditShoppingListItem extends StatefulWidget {
   final String currentName;
   final String currentAmount;
-  final String title;
-  final int index;
+  final String listDocID;
+  final String itemDocID;
 
   const EditShoppingListItem(
-      this.currentName, this.currentAmount, this.title, this.index,
+      this.listDocID, this.itemDocID, this.currentName, this.currentAmount,
       {super.key});
 
   @override
@@ -18,16 +19,9 @@ class EditShoppingListItem extends StatefulWidget {
 }
 
 class _EditShoppingListItemState extends State<EditShoppingListItem> {
-  Map shoppingLists = {};
-  Map shoppingList = {};
   var textFieldErrorText = null;
 
-  @override
-  void initState() {
-    super.initState();
-    shoppingLists = ShoppingListPreferences.getShoppingLists();
-    shoppingList = shoppingLists[widget.title];
-  }
+  ShoppingListRepository shoppingListRepository = ShoppingListRepository();
 
   @override
   Widget build(BuildContext context) {
@@ -80,34 +74,12 @@ class _EditShoppingListItemState extends State<EditShoppingListItem> {
               style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
               child: Text("Edit item"),
               onPressed: () {
-                editItem(widget.index, itemName.text, amount.text);
+                shoppingListRepository.editShoppingListItem(widget.listDocID,
+                    widget.itemDocID, itemName.text, amount.text);
                 Navigator.pop(context);
               },
             ),
           )
         ])));
-  }
-
-  void editItem(int index, String newName, String newAmount) {
-    Map<String, List<dynamic>> newShoppingList = {};
-    List oldlistKeys = shoppingList.keys.toList();
-    List listKeys = shoppingList.keys.toList();
-    listKeys[index] = newName;
-    for (int i = 0; i < listKeys.length; i++) {
-      if (listKeys[i] == newName) {
-        bool checkValue = shoppingList[oldlistKeys[i]]![1];
-        newShoppingList[listKeys[i]] = [newAmount, checkValue];
-      } else {
-        newShoppingList[listKeys[i]] = shoppingList[listKeys[i]]!;
-      }
-    }
-
-    shoppingList.clear();
-    for (final String idx in listKeys) {
-      shoppingList[idx] = newShoppingList[idx]!;
-    }
-
-    shoppingLists[widget.title] = shoppingList;
-    ShoppingListPreferences.setShoppingLists(shoppingLists);
   }
 }

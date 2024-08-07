@@ -39,6 +39,8 @@ dependencies:
   reorderable_grid_view: ^2.2.5
   sembast: ^3.3.1
   shared_preferences: ^2.0.15
+  cloud_firestore: ^4.14.0
+  firebase_core: ^2.24.2
 
 dev_dependencies:
   flutter_test:

@@ -1,15 +1,15 @@
-import 'shoppingListItem.dart';
+final String tableShoppingLists = "shoppingList";
 
-class ShoppingList
-{
-  ShoppingList({this.name, this.items});
-
-  String? name;
-  List<ShoppingListItem>? items;
+class ShoppingList {
+  final int? id;
+  final String name;
+  final DateTime createdTime;
+  final int order;
+  const ShoppingList({this.id, required this.name, required this.order, required this.createdTime});
 
   Map<String, dynamic> toJson() => {
-    "name" : name,
-    "shoppingListItems" : items
-  };
-  
+        "name": name,
+        "createdTime": createdTime.toIso8601String(),
+        "order": order
+      };
 }

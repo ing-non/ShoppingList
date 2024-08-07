@@ -2,11 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:test_app/globals.dart';
+import 'package:test_app/logic/models/shoppingList.dart';
+import 'package:test_app/services/shoppingListRepository.dart';
 
 class AddShoppingList extends StatefulWidget {
-  Map shoppingLists = {};
-  final Function() notifyParent;
-  AddShoppingList(this.notifyParent, {super.key});
+  AddShoppingList({super.key});
   @override
   State<AddShoppingList> createState() => _AddShoppingListState();
 }
@@ -14,6 +14,8 @@ class AddShoppingList extends StatefulWidget {
 class _AddShoppingListState extends State<AddShoppingList> {
   final shoppingListName = TextEditingController();
   var textFieldErrorText = null;
+  ShoppingListRepository shoppingListRepository = ShoppingListRepository();
+
   @override
   void dispose() {
     shoppingListName.dispose();
@@ -57,7 +59,7 @@ class _AddShoppingListState extends State<AddShoppingList> {
               style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
               child: Text("Add new Shopping List"),
               onPressed: () async {
-                addShoppingList();
+                await shoppingListRepository.createShoppingList(ShoppingList(name: shoppingListName.text, order: 0, createdTime: DateTime.now()));
                 Navigator.pop(context);
               },
             ),
@@ -65,12 +67,5 @@ class _AddShoppingListState extends State<AddShoppingList> {
         ],
       ),
     );
-  }
-
-  void addShoppingList() async {
-    widget.shoppingLists = ShoppingListPreferences.getShoppingLists();
-    widget.shoppingLists[shoppingListName.text] = {};
-    await ShoppingListPreferences.setShoppingLists(widget.shoppingLists);
-    setState(() {});
   }
 }

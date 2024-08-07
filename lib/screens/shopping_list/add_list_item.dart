@@ -2,29 +2,23 @@
 
 import 'package:flutter/material.dart';
 import 'package:test_app/globals.dart';
+import 'package:test_app/logic/models/shoppingListItem.dart';
+import 'package:test_app/services/shoppingListRepository.dart';
+
 
 class AddShoppingListItem extends StatefulWidget {
-  String title;
-  final Function notifyParent;
-  AddShoppingListItem(this.title, {super.key, required this.notifyParent});
+  String docID;
+  AddShoppingListItem(this.docID, {super.key});
 
   @override
   State<AddShoppingListItem> createState() => _AddShoppingListItemState();
 }
 
 class _AddShoppingListItemState extends State<AddShoppingListItem> {
-  Map shoppingLists = {};
-  Map shoppingList = {};
   final itemName = TextEditingController();
   final amount = TextEditingController();
   var textFieldErrorText = null;
-
-  @override
-  void initState() {
-    super.initState();
-    shoppingLists = ShoppingListPreferences.getShoppingLists();
-    shoppingList = shoppingLists[widget.title];
-  }
+  ShoppingListRepository shoppingListRepository = ShoppingListRepository();
 
   @override
   void dispose() {
@@ -82,38 +76,14 @@ class _AddShoppingListItemState extends State<AddShoppingListItem> {
               style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
               child: Text("Add Item to list"),
               onPressed: () async {
-                addItem();
+                ShoppingListItem shoppingListItem = ShoppingListItem(name: itemName.text, amount: amount.text, checked: false, createdTime: DateTime.now());
+                shoppingListRepository.createShoppingListItem(widget.docID, shoppingListItem);
+                itemName.clear();
+                amount.clear();
                 //Navigator.pop(context); Automatic return to list on button pressed, not always helpful
               },
             ),
           )
         ])));
-  }
-
-  int checkItemName() {
-    if (shoppingList.containsKey(itemName.text)) {
-      setState(() {
-        textFieldErrorText = "Please enter an item name that is not used!";
-      });
-      return 0;
-    }
-    setState(() {
-      textFieldErrorText = null;
-    });
-    return 1;
-  }
-
-  void addItem() async {
-    if (checkItemName() == 0) {
-      return;
-    } else {
-      shoppingList[itemName.text] = [amount.text, false];
-      itemName.clear();
-      amount.clear();
-
-      shoppingLists[widget.title] = shoppingList;
-      ShoppingListPreferences.setShoppingLists(shoppingLists);
-      widget.notifyParent();
-    }
   }
 }

@@ -2,11 +2,12 @@
 
 import 'package:test_app/globals.dart';
 import 'package:flutter/material.dart';
+import 'package:test_app/services/shoppingListRepository.dart';
 
 class EditShoppingList extends StatefulWidget {
+  final String docID;
   final String title;
-  final ValueChanged<String> onTitleChanged;
-  const EditShoppingList(this.title, {super.key, required this.onTitleChanged});
+  const EditShoppingList(this.docID, this.title, {super.key});
 
   @override
   State<EditShoppingList> createState() => _EditShoppingListState();
@@ -14,11 +15,7 @@ class EditShoppingList extends StatefulWidget {
 
 class _EditShoppingListState extends State<EditShoppingList> {
   Map shoppingLists = {};
-  @override
-  void initState() {
-    super.initState();
-    shoppingLists = ShoppingListPreferences.getShoppingLists();
-  }
+  ShoppingListRepository shoppingListRepository = ShoppingListRepository();
 
   @override
   Widget build(BuildContext context) {
@@ -54,34 +51,11 @@ class _EditShoppingListState extends State<EditShoppingList> {
               style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
               child: Text("Edit List"),
               onPressed: () {
-                editList(itemName.text);
+                shoppingListRepository.editShoppingList(widget.docID, itemName.text);
                 Navigator.pop(context);
-                widget.onTitleChanged(itemName.text);
               },
             ),
           )
         ])));
-  }
-
-  void editList(String newName) {
-    Map newShoppingLists = {};
-    List oldkeyList = shoppingLists.keys.toList();
-    List keyList = shoppingLists.keys.toList();
-    int index = calcIndex(newName, oldkeyList);
-    keyList[index] = newName;
-    for (int i = 0; i < keyList.length; i++) {
-      newShoppingLists[keyList[i]] = shoppingLists[oldkeyList[i]]!;
-    }
-    shoppingLists = newShoppingLists;
-    ShoppingListPreferences.setShoppingLists(shoppingLists);
-  }
-
-  int calcIndex(String newName, List keyList) {
-    for(int index = 0; index < keyList.length; index++) {
-      if (widget.title == keyList[index]) {
-        return index;
-      }
-    }
-    return -1;
   }
 }
