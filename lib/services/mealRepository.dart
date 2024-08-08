@@ -20,6 +20,7 @@ class MealRepository {
   }
 
   Future<void> deleteMeal(String mealDocID) {
+    deleteIngredients(mealDocID);
     return mealCollection.doc(mealDocID).delete();
   }
 
