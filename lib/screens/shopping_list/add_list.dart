@@ -59,7 +59,7 @@ class _AddShoppingListState extends State<AddShoppingList> {
               style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
               child: Text("Add new Shopping List"),
               onPressed: () async {
-                await shoppingListRepository.createShoppingList(ShoppingList(name: shoppingListName.text, order: 0, createdTime: DateTime.now()));
+                await shoppingListRepository.createShoppingList(ShoppingList(shoppingListName.text, 0, DateTime.now()));
                 Navigator.pop(context);
               },
             ),

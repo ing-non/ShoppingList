@@ -4,6 +4,8 @@ import '../logic/models/shoppingList.dart';
 import '../logic/models/shoppingListItem.dart';
 
 class ShoppingListRepository {
+  final shoppingListCollection =
+      FirebaseFirestore.instance.collection("ShoppingLists");
   final _db = FirebaseFirestore.instance;
 
   Future<void> createShoppingList(ShoppingList shoppingList) async {
@@ -33,7 +35,7 @@ class ShoppingListRepository {
   }
 
   Future<void> deleteShoppingList(String listDocID) {
-    return _db.collection("ShoppingLists").doc(listDocID).delete();
+    return deleteShoppingListWithItems(listDocID);
   }
 
   Future<void> createShoppingListItem(
@@ -76,6 +78,17 @@ class ShoppingListRepository {
         .collection("ShoppingListItems")
         .doc(itemDocID)
         .delete();
+  }
+
+  Future<void> deleteShoppingListWithItems(String listDocID) async {
+    var subcollectionDocs = await shoppingListCollection
+        .doc(listDocID)
+        .collection("ShoppingListItems")
+        .get();
+    for (final subcollectionDoc in subcollectionDocs.docs) {
+      deleteShoppingListItem(listDocID, subcollectionDoc.id);
+    }
+    shoppingListCollection.doc(listDocID).delete();
   }
 
   WriteBatch getBatch() {

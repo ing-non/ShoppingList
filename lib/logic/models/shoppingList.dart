@@ -1,15 +1,14 @@
 final String tableShoppingLists = "shoppingList";
 
 class ShoppingList {
-  final int? id;
-  final String name;
-  final DateTime createdTime;
-  final int order;
-  const ShoppingList({this.id, required this.name, required this.order, required this.createdTime});
+  String name;
+  DateTime creationTime;
+  int order;
+  ShoppingList(this.name,  this.order,  this.creationTime);
 
   Map<String, dynamic> toJson() => {
         "name": name,
-        "createdTime": createdTime.toIso8601String(),
+        "creationTime": creationTime.toIso8601String(),
         "order": order
       };
 }
