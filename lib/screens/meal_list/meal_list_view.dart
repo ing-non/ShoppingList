@@ -1,11 +1,11 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:test_app/globals.dart';
-import 'package:test_app/main.dart';
+import 'package:test_app/services/mealRepository.dart';
 import 'add_meal_view.dart';
 import 'edit_meal_view.dart';
-import '../../logic/meal_list_logic.dart';
 
 String mealListName = "Meal list";
 
@@ -18,16 +18,13 @@ class CalenderHome extends StatefulWidget {
 
 class _CalenderHomeState extends State<CalenderHome> {
   static double addMealSize = 56;
-  late Map meals;
-  late MealListLogic mealListLogic;
   late Color mainColor;
   late Color accentColor;
+  MealRepository mealRepository = MealRepository();
 
   @override
   void initState() {
     super.initState();
-    meals = MenuStoragePreferences.getMeals();
-    mealListLogic = MealListLogic();
     mainColor = globalMainColor;
     accentColor = globalAccentColor;
   }
@@ -53,15 +50,9 @@ class _CalenderHomeState extends State<CalenderHome> {
                       borderRadius: BorderRadius.circular(addMealSize / 2),
                       onTap: () {
                         Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => AddMealView()))
-                            .then((value) {
-                          setState(() {
-                            meals = MenuStoragePreferences.getMeals();
-                            print(meals);
-                          });
-                        });
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => AddMealView()));
                       },
                       child: Icon(
                         Icons.add,
@@ -69,42 +60,53 @@ class _CalenderHomeState extends State<CalenderHome> {
                       ),
                     )))
           ]),
-      body: ScrollConfiguration(
-        behavior: ScrollBehavior(),
-        child: GlowingOverscrollIndicator(
-          axisDirection: AxisDirection.down,
-          color: accentColor,
-          child: Center(
-              child: ListView.builder(
-            itemCount: meals.keys.toList().length,
-            itemBuilder: (BuildContext context, int index) {
-              return GestureDetector(
-                child: Container(
-                    padding: EdgeInsets.only(bottom: 5, top: 5),
-                    child: ListTile(
-                        key: Key('$index'),
-                        title: Text("${meals.keys.toList()[index]}"),
-                        trailing: GestureDetector(
-                          child: Icon(Icons.delete),
-                          onTap: () {
-                            MealListLogic().delete(meals.keys.toList()[index]);
-                            setState(() {
-                              meals = MenuStoragePreferences.getMeals();
-                            });
-                          },
-                        ))),
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              EditMealView("${meals.keys.toList()[index]}")));
-                },
+      body: StreamBuilder<QuerySnapshot>(
+          stream: mealRepository.getMeals(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              List mealList = snapshot.data!.docs;
+              return ScrollConfiguration(
+                behavior: ScrollBehavior(),
+                child: GlowingOverscrollIndicator(
+                  axisDirection: AxisDirection.down,
+                  color: accentColor,
+                  child: Center(
+                      child: ListView.builder(
+                    itemCount: mealList.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      DocumentSnapshot document = mealList[index];
+                      String mealDocID = document.id;
+                      Map<String, dynamic> data =
+                          document.data() as Map<String, dynamic>;
+                      String mealText = data["name"];
+                      return GestureDetector(
+                        child: Container(
+                            padding: EdgeInsets.only(bottom: 5, top: 5),
+                            child: ListTile(
+                                key: Key('$index'),
+                                title: Text(mealText),
+                                trailing: GestureDetector(
+                                  child: Icon(Icons.delete),
+                                  onTap: () {
+                                    mealRepository.deleteMeal(mealDocID);
+                                  },
+                                ))),
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      EditMealView(mealDocID, mealText)));
+                        },
+                      );
+                    },
+                  )),
+                ),
               );
-            },
-          )),
-        ),
-      ),
+            } else {
+              return Center(child: CircularProgressIndicator());
+            }
+          }),
     );
   }
 }

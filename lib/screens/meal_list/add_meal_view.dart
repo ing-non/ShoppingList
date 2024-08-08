@@ -1,8 +1,9 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:test_app/logic/meal_list_logic.dart';
+import 'package:test_app/logic/models/ingredient.dart';
 import 'package:test_app/logic/models/meal.dart';
+import 'package:test_app/services/mealRepository.dart';
 
 class AddMealView extends StatefulWidget {
   const AddMealView({super.key});
@@ -13,56 +14,10 @@ class AddMealView extends StatefulWidget {
 
 class _AddMealViewState extends State<AddMealView> {
   final nameController = TextEditingController();
-  late MealListLogic mealListLogic;
+  MealRepository mealRepository = MealRepository();
   int ingredientIndex = 0;
-  Map<String, Container> ingredientControllers = {};
 
-  @override
-  void initState() {
-    super.initState();
-    mealListLogic = MealListLogic();
-    ingredientControllers[ingredientIndex.toString()] =
-        (addIngredient(ingredientIndex));
-  }
-
-  var ingredientTECs = <TextEditingController>[];
-
-  Container addIngredient(int index) {
-    var ingredientController = TextEditingController();
-    ingredientTECs.add(ingredientController);
-    return Container(
-        padding: EdgeInsets.only(top: 20, bottom: 20),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                  controller: ingredientController,
-                  style: TextStyle(fontSize: 18),
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: "Ingredient",
-                    errorText: textFieldErrorText,
-                    focusedErrorBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.red)),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black26),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.purpleAccent)),
-                  )),
-            ),
-            GestureDetector(
-              child: Icon(Icons.close),
-              onTap: () {
-                setState(() {
-                  ingredientControllers.remove(index.toString());
-                });
-              },
-            )
-          ],
-        ));
-  }
-
+  List ingredientTECs = <TextEditingController>[];
   var textFieldErrorText = null;
   @override
   Widget build(BuildContext context) {
@@ -118,9 +73,43 @@ class _AddMealViewState extends State<AddMealView> {
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 30),
                     child: ListView.builder(
-                        itemCount: ingredientControllers.length,
+                        itemCount: ingredientTECs.length,
                         itemBuilder: (BuildContext context, int index) {
-                          return ingredientControllers.values.toList()[index];
+                          return Container(
+                              padding: EdgeInsets.only(top: 20, bottom: 20),
+                              child: Row(children: [
+                                Expanded(
+                                  child: TextFormField(
+                                      controller: ingredientTECs[index],
+                                      style: TextStyle(fontSize: 18),
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(),
+                                        hintText: "Ingredient",
+                                        errorText: textFieldErrorText,
+                                        focusedErrorBorder:
+                                            UnderlineInputBorder(
+                                                borderSide: BorderSide(
+                                                    color: Colors.red)),
+                                        enabledBorder: UnderlineInputBorder(
+                                          borderSide:
+                                              BorderSide(color: Colors.black26),
+                                        ),
+                                        focusedBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: Colors.purpleAccent)),
+                                      )),
+                                ),
+                                GestureDetector(
+                                  child: Icon(Icons.close),
+                                  onTap: () {
+                                    setState(() {
+                                      ingredientTECs.removeAt(index);
+                                    });
+                                  },
+                                )
+                              ]));
+
+                          //return ingredientControllers.values.toList()[index];
                         }),
                   ),
                 ),
@@ -129,10 +118,9 @@ class _AddMealViewState extends State<AddMealView> {
                     child: ElevatedButton(
                         child: Text("Add ingredient"),
                         onPressed: () {
-                          ingredientIndex += 1;
-                          setState(() =>
-                              ingredientControllers[ingredientIndex.toString()] =
-                                  (addIngredient(ingredientIndex)));
+                          setState(() {
+                            ingredientTECs.add(TextEditingController());
+                          });
                         })),
               ],
             ),
@@ -142,15 +130,13 @@ class _AddMealViewState extends State<AddMealView> {
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
               child: Text("Add Item to list"),
-              onPressed: () {
-                Map<String, String> ingredients = {};
-                for(var i in ingredientTECs)
-                {
-                  ingredients[i.text] = "500g"; 
+              onPressed: () async {
+                Meal meal = Meal(nameController.text, DateTime.now());
+                String mealDocID = await mealRepository.addMeal(meal);
+                for (var ing in ingredientTECs) {
+                  Ingredient ingredient = Ingredient(ing.text, DateTime.now());
+                  await mealRepository.addIngredient(mealDocID, ingredient);
                 }
-                Meal meal = Meal(name: nameController.text, ingredients: ingredients);
-                mealListLogic.addMeal(meal);
-                setState(() {});
                 //Navigator.pop(context); Automatic return to list on button pressed, not always helpful
               },
             ),
