@@ -1,31 +1,19 @@
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:test_app/globals.dart';
+import 'package:test_app/logic/models/meal.dart';
+import 'package:test_app/logic/models/menu.dart';
+import 'package:test_app/services/mealRepository.dart';
+import 'package:test_app/services/menuRepository.dart';
 
 class MenuViewLogic {
-  late Map allTimeMenus;
-  late Map meals;
+  MenuRepository menuRepository = MenuRepository();
+  MealRepository mealRepository = MealRepository();
 
-  MenuViewLogic() {
-    allTimeMenus = MenuStoragePreferences.getAllTimeMenusPerWeek();
-    meals = MenuStoragePreferences.getMeals();
-  }
+  MenuViewLogic() {}
 
-  List getWeeklyMenu(DateTime startDate) {
-    if (allTimeMenus.containsKey(startDate.toString())) {
-      return allTimeMenus[startDate.toString()];
-    }
-    List menu = [];
-    if (meals.length > 0) {
-      for (int i = 0; i < 7; i++) {
-        menu.add(meals.keys.toList()[Random().nextInt(meals.length)]);
-      }
-      return menu;
-    }
-    return ["", "", "", "", "", "", ""];
-  }
-
-  DateTime setDateToMonday(DateTime date) {
+  DateTime _setDateToMonday(DateTime date) {
     while (true) {
       if (date.weekday != 1) {
         date = date.subtract(const Duration(days: 1));
@@ -36,31 +24,65 @@ class MenuViewLogic {
     return date;
   }
 
-  int getIndexOfCurrentWeekFromAllTimeMenus() {
-    DateTime dtNow = DateUtils.dateOnly(DateTime.now());
-    List allTimeMenusKeys = allTimeMenus.keys.toList();
-    int indexOfDtNow =
-        allTimeMenusKeys.indexOf(setDateToMonday(dtNow).toString());
-    if (indexOfDtNow >= 0) {
-      return indexOfDtNow;
-    } else {
-      return allTimeMenusKeys.length;
+  Future<int> getIndexOfCurrentWeekFromMenus() async {
+    DateTime dtNow = DateUtils.dateOnly(_setDateToMonday(DateTime.now()));
+    QuerySnapshot snapshot = await menuRepository.getAllMenus();
+    Map<String, dynamic> menu = {};
+    int i = 0;
+    for (var doc in snapshot.docs) {
+      menu = doc.data() as Map<String, dynamic>;
+      DateTime menuStartDate = menu["startDate"].toDate();
+      if (menuStartDate.day == dtNow.day &&
+          menuStartDate.month == dtNow.month &&
+          menuStartDate.year == dtNow.year) {
+        return i;
+      }
+      i++;
     }
+    return 0;
   }
 
-  void deleteMenu(double? page) {
-    List allTimeMenusKeys = allTimeMenus.keys.toList();
-    String toDelete = allTimeMenusKeys[page!.toInt()];
-    allTimeMenus.remove(toDelete);
-    MenuStoragePreferences.setAllTimeMenusPerWeek(allTimeMenus);
+  Future<bool> _checkIfMenuForThisWeekExists(DateTime startDate) async {
+    QuerySnapshot snapshot = await menuRepository.getAllMenus();
+    try {
+      DocumentSnapshot latestMenuSnapshot = snapshot.docs[0];
+      Map<String, dynamic> latestMenu =
+          latestMenuSnapshot.data() as Map<String, dynamic>;
+      DateTime startDateOfLatestMenu = latestMenu["startDate"].toDate();
+      if (startDate == startDateOfLatestMenu) {
+        return false;
+      }
+    } catch (exception) {
+      return true;
+    }
+
+    return true;
   }
 
-  void createMenu() {
-    final dtNextWeek =
-        DateUtils.dateOnly(DateTime.now().add(Duration(days: 7)));
-    List weeklyMenu = getWeeklyMenu(setDateToMonday(dtNextWeek));
-    allTimeMenus[setDateToMonday(dtNextWeek).toString()] = weeklyMenu;
-    //allTimeMenus.remove(createMenu.setStartDateToMonday(dtNextWeek).toString());
-    MenuStoragePreferences.setAllTimeMenusPerWeek(allTimeMenus);
+  void createMenu() async {
+    Map<String, dynamic> allMeals = {};
+    List<String> weeklyMeals = <String>[];
+    QuerySnapshot snapshot = await mealRepository.getAllMeals();
+
+    for (var doc in snapshot.docs) {
+      allMeals[doc.id] = doc.data() as Map<String, dynamic>;
+    }
+
+    for (int i = 0; i < 7; i++) {
+      String id = allMeals.keys.toList()[Random().nextInt(allMeals.length)];
+      weeklyMeals.add(id);
+    }
+    final todayNextWeek =
+        DateUtils.dateOnly(DateTime.now().add(const Duration(days: 7)));
+    final nextMonday = _setDateToMonday(todayNextWeek);
+
+    Menu menu = Menu(
+        startDate: nextMonday,
+        endDate: nextMonday.add(const Duration(days: 6)),
+        weeklyMeals);
+
+    if (await _checkIfMenuForThisWeekExists(nextMonday)) {
+      menuRepository.addMenu(menu);
+    }
   }
 }

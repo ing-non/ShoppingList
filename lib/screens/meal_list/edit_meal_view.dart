@@ -26,12 +26,7 @@ class _EditMealViewState extends State<EditMealView> {
     super.initState();
     nameController = TextEditingController(text: widget.name);
 
-    mealRepository.getIngredients(widget.mealDocID).forEach((element) {
-      for (var doc in element.docs) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        ingredientTECs.add(TextEditingController(text: data["name"]));
-      }
-    });
+    
   }
 
   @override
