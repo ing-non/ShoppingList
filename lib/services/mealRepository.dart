@@ -15,6 +15,15 @@ class MealRepository {
     return mealStream;
   }
 
+  Future<DocumentSnapshot> getMealByID(String mealDocID) {
+    final mealFuture = mealCollection.doc(mealDocID).get();
+    return mealFuture;
+  }
+
+  Future<QuerySnapshot> getAllMeals() {
+    return mealCollection.get();
+  }
+
   Future<void> editMeal(String mealDocID, String newTitle) {
     return mealCollection.doc(mealDocID).update({"name": newTitle});
   }

@@ -129,14 +129,16 @@ class _AddMealViewState extends State<AddMealView> {
             padding: EdgeInsets.all(20),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-              child: Text("Add Item to list"),
+              child: Text("Add meal to list"),
               onPressed: () async {
-                Meal meal = Meal(nameController.text, DateTime.now());
+                Meal meal = Meal(name: nameController.text, creationTime: DateTime.now());
                 String mealDocID = await mealRepository.addMeal(meal);
                 for (var ing in ingredientTECs) {
                   Ingredient ingredient = Ingredient(ing.text, DateTime.now());
                   await mealRepository.addIngredient(mealDocID, ingredient);
+                  ing.clear();
                 }
+                nameController.clear();
                 //Navigator.pop(context); Automatic return to list on button pressed, not always helpful
               },
             ),
