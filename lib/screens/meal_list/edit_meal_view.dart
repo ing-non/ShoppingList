@@ -17,7 +17,8 @@ class EditMealView extends StatefulWidget {
 class _EditMealViewState extends State<EditMealView> {
   late TextEditingController nameController;
   MealRepository mealRepository = MealRepository();
-  var ingredientTECs = <TextEditingController>[];
+  List ingredientTECs = <TextEditingController>[];
+  List amountTECs = <TextEditingController>[];
 
   var textFieldErrorText = null;
 
@@ -26,7 +27,13 @@ class _EditMealViewState extends State<EditMealView> {
     super.initState();
     nameController = TextEditingController(text: widget.name);
 
-    
+    mealRepository.getIngredients(widget.mealDocID).forEach((element) {
+      for (var doc in element.docs) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        ingredientTECs.add(TextEditingController(text: data["name"]));
+        amountTECs.add(TextEditingController(text: data["amount"]));
+      }
+    });
   }
 
   @override
@@ -83,7 +90,6 @@ class _EditMealViewState extends State<EditMealView> {
                     stream: mealRepository.getIngredients(widget.mealDocID),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
-                        List ingredientList = snapshot.data!.docs;
                         return Expanded(
                           child: Container(
                             padding: EdgeInsets.symmetric(horizontal: 30),
@@ -96,6 +102,7 @@ class _EditMealViewState extends State<EditMealView> {
                                       child: Row(
                                         children: [
                                           Expanded(
+                                            flex: 2,
                                             child: TextFormField(
                                                 controller:
                                                     ingredientTECs[index],
@@ -103,6 +110,32 @@ class _EditMealViewState extends State<EditMealView> {
                                                 decoration: InputDecoration(
                                                   border: OutlineInputBorder(),
                                                   hintText: "Ingredient",
+                                                  errorText: textFieldErrorText,
+                                                  focusedErrorBorder:
+                                                      UnderlineInputBorder(
+                                                          borderSide:
+                                                              BorderSide(
+                                                                  color: Colors
+                                                                      .red)),
+                                                  enabledBorder:
+                                                      UnderlineInputBorder(
+                                                    borderSide: BorderSide(
+                                                        color: Colors.black26),
+                                                  ),
+                                                  focusedBorder:
+                                                      UnderlineInputBorder(
+                                                          borderSide: BorderSide(
+                                                              color: Colors
+                                                                  .purpleAccent)),
+                                                )),
+                                          ),
+                                          Expanded(
+                                            child: TextFormField(
+                                                controller: amountTECs[index],
+                                                style: TextStyle(fontSize: 18),
+                                                decoration: InputDecoration(
+                                                  border: OutlineInputBorder(),
+                                                  hintText: "Amount",
                                                   errorText: textFieldErrorText,
                                                   focusedErrorBorder:
                                                       UnderlineInputBorder(
@@ -146,6 +179,7 @@ class _EditMealViewState extends State<EditMealView> {
                         onPressed: () {
                           setState(() {
                             ingredientTECs.add(TextEditingController());
+                            amountTECs.add(TextEditingController());
                           });
                         })),
               ],
@@ -159,8 +193,11 @@ class _EditMealViewState extends State<EditMealView> {
               onPressed: () {
                 mealRepository.deleteIngredients(widget.mealDocID);
                 mealRepository.editMeal(widget.mealDocID, nameController.text);
-                for (var ing in ingredientTECs) {
-                  Ingredient ingredient = Ingredient(ing.text, DateTime.now());
+                for (int i = 0; i < ingredientTECs.length; i++) {
+                  Ingredient ingredient = Ingredient(
+                      name: ingredientTECs[i].text,
+                      amount: amountTECs[i].text,
+                      creationTime: DateTime.now());
                   mealRepository.addIngredient(widget.mealDocID, ingredient);
                 }
                 Navigator.pop(context);

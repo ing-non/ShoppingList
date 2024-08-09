@@ -18,6 +18,7 @@ class _AddMealViewState extends State<AddMealView> {
   int ingredientIndex = 0;
 
   List ingredientTECs = <TextEditingController>[];
+  List amountTECs = <TextEditingController>[];
   var textFieldErrorText = null;
   @override
   Widget build(BuildContext context) {
@@ -79,12 +80,34 @@ class _AddMealViewState extends State<AddMealView> {
                               padding: EdgeInsets.only(top: 20, bottom: 20),
                               child: Row(children: [
                                 Expanded(
+                                  flex: 2,
                                   child: TextFormField(
                                       controller: ingredientTECs[index],
                                       style: TextStyle(fontSize: 18),
                                       decoration: InputDecoration(
                                         border: OutlineInputBorder(),
                                         hintText: "Ingredient",
+                                        errorText: textFieldErrorText,
+                                        focusedErrorBorder:
+                                            UnderlineInputBorder(
+                                                borderSide: BorderSide(
+                                                    color: Colors.red)),
+                                        enabledBorder: UnderlineInputBorder(
+                                          borderSide:
+                                              BorderSide(color: Colors.black26),
+                                        ),
+                                        focusedBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: Colors.purpleAccent)),
+                                      )),
+                                ),
+                                Expanded(
+                                  child: TextFormField(
+                                      controller: amountTECs[index],
+                                      style: TextStyle(fontSize: 18),
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(),
+                                        hintText: "Amount",
                                         errorText: textFieldErrorText,
                                         focusedErrorBorder:
                                             UnderlineInputBorder(
@@ -120,6 +143,7 @@ class _AddMealViewState extends State<AddMealView> {
                         onPressed: () {
                           setState(() {
                             ingredientTECs.add(TextEditingController());
+                            amountTECs.add(TextEditingController());
                           });
                         })),
               ],
@@ -131,12 +155,17 @@ class _AddMealViewState extends State<AddMealView> {
               style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
               child: Text("Add meal to list"),
               onPressed: () async {
-                Meal meal = Meal(name: nameController.text, creationTime: DateTime.now());
+                Meal meal = Meal(
+                    name: nameController.text, creationTime: DateTime.now());
                 String mealDocID = await mealRepository.addMeal(meal);
-                for (var ing in ingredientTECs) {
-                  Ingredient ingredient = Ingredient(ing.text, DateTime.now());
+                for (int i = 0; i < ingredientTECs.length; i++) {
+                  Ingredient ingredient = Ingredient(
+                      name: ingredientTECs[i].text,
+                      amount: amountTECs[i].text,
+                      creationTime: DateTime.now());
                   await mealRepository.addIngredient(mealDocID, ingredient);
-                  ing.clear();
+                  ingredientTECs[i].clear();
+                  amountTECs[i].clear();
                 }
                 nameController.clear();
                 //Navigator.pop(context); Automatic return to list on button pressed, not always helpful
